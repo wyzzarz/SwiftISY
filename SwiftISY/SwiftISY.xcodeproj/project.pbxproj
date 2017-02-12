@@ -8,6 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		99863A851E4D6C0D001DAB3B /* SwiftISY.h in Headers */ = {isa = PBXBuildFile; fileRef = 99863A831E4D6C0D001DAB3B /* SwiftISY.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		99863AC41E4ECB27001DAB3B /* SwiftISYConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC31E4ECB27001DAB3B /* SwiftISYConstants.swift */; };
+		99863AC61E4ECF15001DAB3B /* SwiftISYRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC51E4ECF15001DAB3B /* SwiftISYRequest.swift */; };
+		99863AC91E4ECF38001DAB3B /* SwiftISYParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC71E4ECF38001DAB3B /* SwiftISYParser.swift */; };
+		99863ACA1E4ECF38001DAB3B /* SwiftISYObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC81E4ECF38001DAB3B /* SwiftISYObject.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -16,6 +20,10 @@
 		99863A841E4D6C0D001DAB3B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = SwiftISY/Info.plist; sourceTree = "<group>"; };
 		99863AAC1E4D714A001DAB3B /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; name = LICENSE; path = ../LICENSE; sourceTree = "<group>"; };
 		99863AAD1E4D714A001DAB3B /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		99863AC31E4ECB27001DAB3B /* SwiftISYConstants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYConstants.swift; sourceTree = "<group>"; };
+		99863AC51E4ECF15001DAB3B /* SwiftISYRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYRequest.swift; sourceTree = "<group>"; };
+		99863AC71E4ECF38001DAB3B /* SwiftISYParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYParser.swift; sourceTree = "<group>"; };
+		99863AC81E4ECF38001DAB3B /* SwiftISYObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYObject.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,6 +58,10 @@
 			isa = PBXGroup;
 			children = (
 				99863A831E4D6C0D001DAB3B /* SwiftISY.h */,
+				99863AC51E4ECF15001DAB3B /* SwiftISYRequest.swift */,
+				99863AC71E4ECF38001DAB3B /* SwiftISYParser.swift */,
+				99863AC81E4ECF38001DAB3B /* SwiftISYObject.swift */,
+				99863AC31E4ECB27001DAB3B /* SwiftISYConstants.swift */,
 			);
 			path = SwiftISY;
 			sourceTree = "<group>";
@@ -107,6 +119,7 @@
 				TargetAttributes = {
 					99863A7F1E4D6C0D001DAB3B = {
 						CreatedOnToolsVersion = 8.2.1;
+						LastSwiftMigration = 0820;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -143,6 +156,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				99863AC41E4ECB27001DAB3B /* SwiftISYConstants.swift in Sources */,
+				99863AC61E4ECF15001DAB3B /* SwiftISYRequest.swift in Sources */,
+				99863ACA1E4ECF38001DAB3B /* SwiftISYObject.swift in Sources */,
+				99863AC91E4ECF38001DAB3B /* SwiftISYParser.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -171,7 +188,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 0.1;
+				CURRENT_PROJECT_VERSION = 0.1.0;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -222,7 +239,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 0.1;
+				CURRENT_PROJECT_VERSION = 0.1.0;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -247,6 +264,7 @@
 		99863A891E4D6C0D001DAB3B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -259,6 +277,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.wyz.SwiftISY;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
@@ -266,6 +285,7 @@
 		99863A8A1E4D6C0D001DAB3B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;

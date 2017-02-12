@@ -18,7 +18,61 @@
 //
 
 import UIKit
+import SwiftISY
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+
+  // create request to host
+  let request = SwiftISYRequest(host: SwiftISYHost(host: "your host", user: "your username"))
+  
+  // create array to hold devices
+  var nodes: [SwiftISYNode] = []
+  
+  // initalize table to display devices
+  let cellId = "cell"
+  let tableView = UITableView()
+  
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    
+    // add table
+    tableView.dataSource = self
+    tableView.delegate = self
+    var frame = self.view.frame
+    frame.origin.y = 20
+    frame.size.height -= frame.origin.y
+    tableView.frame = frame
+    self.view.addSubview(tableView)
+    
+    // get nodes
+    request.nodes { (results) in
+      if let objects = results.objects { self.nodes = objects.nodes.sorted(by: { (n1, n2) -> Bool in
+        return n1.name.compare(n2.name) == ComparisonResult.orderedAscending
+      }) }
+      self.tableView.reloadData()
+    }
+    
+  }
+  
+  func numberOfSections(in tableView: UITableView) -> Int {
+    return 1
+  }
+  
+  func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    return nodes.count
+  }
+  
+  func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    var cell: UITableViewCell?
+    if let aCell = tableView.dequeueReusableCell(withIdentifier: cellId) {
+      cell = aCell
+    } else {
+      cell = UITableViewCell(style: .subtitle, reuseIdentifier: cellId)
+    }
+    let node = nodes[indexPath.row]
+    cell?.textLabel?.text = node.name
+    cell?.detailTextLabel?.text = node.address
+    return cell!
+  }
   
 }

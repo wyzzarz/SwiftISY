@@ -1,0 +1,147 @@
+//
+//  SwiftISYParser.swift
+//
+//  Copyright 2017 Warner Zee
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
+
+import Foundation
+
+///
+/// Instances of The SwiftISYParser class parses the XML results returned by requests to 
+/// ISY devices.
+///
+class SwiftISYParser: NSObject, XMLParserDelegate {
+  
+  // XML
+  var parser: XMLParser?
+  var completion: ((_ objects: SwiftISYObjects) -> Void)?
+  var texts: [String] = []
+  var attributes: [[String: String]] = []
+  var currentIndex: Int? { get { return texts.count > 0 && texts.count == attributes.count ? texts.count - 1 : nil } }
+
+  // Objects
+  var objects = SwiftISYObjects()
+  
+  // Group
+  var isProcessingGroup = false
+  var currentGroup: SwiftISYGroup?
+  
+  // Node
+  var isProcessingNode = false
+  var currentNode: SwiftISYNode?
+
+  // Status
+  var currentStatus: SwiftISYStatus?
+  
+  // Response
+  var isProcessingResponse = false
+  var currentResponse: SwiftISYResponse?
+  
+  init(data: Data) {
+    super.init()
+    parser = XMLParser(data: data)
+    parser!.delegate = self
+  }
+
+  func parse(completion: @escaping (_ objects: SwiftISYObjects) -> Void) -> SwiftISYParser {
+    self.completion = completion
+    parser!.parse()
+    return self
+  }
+  
+  func parserDidEndDocument(_ parser: XMLParser) {
+    if completion != nil { completion!(objects) }
+  }
+
+  func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
+    // hold text for this element
+    texts.append("")
+    
+    // hold attributes for this element
+    attributes.append(attributeDict)
+    
+    // process this element
+    if elementName == SwiftISYConstants.Elements.group {
+      // handle group
+      currentGroup = SwiftISYGroup(elementName: elementName, attributes: attributeDict)
+      objects.groups.append(currentGroup!)
+      isProcessingGroup = true
+    } else if elementName == SwiftISYConstants.Elements.node {
+      // handle node
+      currentNode = SwiftISYNode(elementName: elementName, attributes: attributeDict)
+      objects.nodes.append(currentNode!)
+      isProcessingNode = true
+    } else if elementName == SwiftISYConstants.Elements.restResponse {
+      // handle rest response
+      currentResponse = SwiftISYResponse(elementName: elementName, attributes: attributeDict)
+      objects.responses.append(currentResponse!)
+      isProcessingResponse = true
+    }
+  }
+
+  func parser(_ parser: XMLParser, foundCharacters string: String) {
+    // append text to the current element
+    guard var text = texts.last else { return }
+    guard let index = currentIndex else { return }
+    text += string
+    texts[index] = text
+  }
+  
+  func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
+    // remove text for this element
+    let text = texts.removeLast()
+    
+    // remove attributes for this element
+    let attributesDict = attributes.removeLast()
+    
+    // process this element including any text and attributes
+    if elementName == SwiftISYConstants.Elements.group {
+      // process group
+      currentGroup = nil
+      isProcessingGroup = false
+    } else if elementName == SwiftISYConstants.Elements.node {
+      // process node
+      defer {
+        currentNode = nil
+        currentStatus = nil
+        isProcessingNode = false
+      }
+      guard let node = currentNode else { return }
+      guard let status = currentStatus else { return }
+      objects.statuses[node.address] = status
+    } else if elementName == SwiftISYConstants.Elements.restResponse {
+      // process rest response
+      currentResponse = nil
+      isProcessingResponse = false
+    } else if isProcessingGroup {
+      // handle group properties
+      guard let group = currentGroup else { return }
+      group.update(elementName: elementName, attributes: attributesDict, text: text)
+    } else if isProcessingNode {
+      // handle node properties
+      if elementName == SwiftISYConstants.Elements.property && SwiftISYStatus.canHandle(elementName: elementName, attributes: attributesDict) {
+        currentStatus = SwiftISYStatus(elementName: elementName, attributes: attributesDict)
+      } else {
+        guard let node = currentNode else { return }
+        node.update(elementName: elementName, attributes: attributesDict, text: text)
+      }
+    } else if isProcessingResponse {
+      // handle rest response
+      guard let response = currentResponse else { return }
+      response.update(elementName: elementName, attributes: attributesDict, text: text)
+    }
+  }
+  
+}
