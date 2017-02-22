@@ -12,7 +12,19 @@
 		99863AC61E4ECF15001DAB3B /* SwiftISYRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC51E4ECF15001DAB3B /* SwiftISYRequest.swift */; };
 		99863AC91E4ECF38001DAB3B /* SwiftISYParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC71E4ECF38001DAB3B /* SwiftISYParser.swift */; };
 		99863ACA1E4ECF38001DAB3B /* SwiftISYObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC81E4ECF38001DAB3B /* SwiftISYObject.swift */; };
+		99F855061E5CDE3800AB3D71 /* SwiftISYHostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F855051E5CDE3800AB3D71 /* SwiftISYHostTests.swift */; };
+		99F855081E5CDE3800AB3D71 /* SwiftISY.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99863A801E4D6C0D001DAB3B /* SwiftISY.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		99F855091E5CDE3800AB3D71 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 99863A771E4D6C0C001DAB3B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 99863A7F1E4D6C0D001DAB3B;
+			remoteInfo = SwiftISY;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		99863A801E4D6C0D001DAB3B /* SwiftISY.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftISY.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -24,6 +36,8 @@
 		99863AC51E4ECF15001DAB3B /* SwiftISYRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYRequest.swift; sourceTree = "<group>"; };
 		99863AC71E4ECF38001DAB3B /* SwiftISYParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYParser.swift; sourceTree = "<group>"; };
 		99863AC81E4ECF38001DAB3B /* SwiftISYObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYObject.swift; sourceTree = "<group>"; };
+		99F855031E5CDE3800AB3D71 /* SwiftISYTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftISYTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		99F855051E5CDE3800AB3D71 /* SwiftISYHostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftISYHostTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,6 +45,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		99F855001E5CDE3800AB3D71 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				99F855081E5CDE3800AB3D71 /* SwiftISY.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -42,6 +64,7 @@
 			children = (
 				99863AAB1E4D70ED001DAB3B /* Metadata */,
 				99863A821E4D6C0D001DAB3B /* SwiftISY */,
+				99F855041E5CDE3800AB3D71 /* SwiftISYTests */,
 				99863A811E4D6C0D001DAB3B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -50,6 +73,7 @@
 			isa = PBXGroup;
 			children = (
 				99863A801E4D6C0D001DAB3B /* SwiftISY.framework */,
+				99F855031E5CDE3800AB3D71 /* SwiftISYTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -74,6 +98,14 @@
 				99863A841E4D6C0D001DAB3B /* Info.plist */,
 			);
 			name = Metadata;
+			sourceTree = "<group>";
+		};
+		99F855041E5CDE3800AB3D71 /* SwiftISYTests */ = {
+			isa = PBXGroup;
+			children = (
+				99F855051E5CDE3800AB3D71 /* SwiftISYHostTests.swift */,
+			);
+			path = SwiftISYTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -108,18 +140,41 @@
 			productReference = 99863A801E4D6C0D001DAB3B /* SwiftISY.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		99F855021E5CDE3800AB3D71 /* SwiftISYTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 99F8550D1E5CDE3800AB3D71 /* Build configuration list for PBXNativeTarget "SwiftISYTests" */;
+			buildPhases = (
+				99F854FF1E5CDE3800AB3D71 /* Sources */,
+				99F855001E5CDE3800AB3D71 /* Frameworks */,
+				99F855011E5CDE3800AB3D71 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				99F8550A1E5CDE3800AB3D71 /* PBXTargetDependency */,
+			);
+			name = SwiftISYTests;
+			productName = SwiftISYTests;
+			productReference = 99F855031E5CDE3800AB3D71 /* SwiftISYTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		99863A771E4D6C0C001DAB3B /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0820;
 				LastUpgradeCheck = 0820;
 				ORGANIZATIONNAME = "Warner Zee";
 				TargetAttributes = {
 					99863A7F1E4D6C0D001DAB3B = {
 						CreatedOnToolsVersion = 8.2.1;
 						LastSwiftMigration = 0820;
+						ProvisioningStyle = Automatic;
+					};
+					99F855021E5CDE3800AB3D71 = {
+						CreatedOnToolsVersion = 8.2.1;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -137,12 +192,20 @@
 			projectRoot = "";
 			targets = (
 				99863A7F1E4D6C0D001DAB3B /* SwiftISY */,
+				99F855021E5CDE3800AB3D71 /* SwiftISYTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		99863A7E1E4D6C0D001DAB3B /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		99F855011E5CDE3800AB3D71 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -163,7 +226,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		99F854FF1E5CDE3800AB3D71 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				99F855061E5CDE3800AB3D71 /* SwiftISYHostTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		99F8550A1E5CDE3800AB3D71 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 99863A7F1E4D6C0D001DAB3B /* SwiftISY */;
+			targetProxy = 99F855091E5CDE3800AB3D71 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		99863A861E4D6C0D001DAB3B /* Debug */ = {
@@ -302,6 +381,32 @@
 			};
 			name = Release;
 		};
+		99F8550B1E5CDE3800AB3D71 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				INFOPLIST_FILE = SwiftISY/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.wyz.SwiftISYTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Debug;
+		};
+		99F8550C1E5CDE3800AB3D71 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				INFOPLIST_FILE = SwiftISY/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.wyz.SwiftISYTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -322,6 +427,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		99F8550D1E5CDE3800AB3D71 /* Build configuration list for PBXNativeTarget "SwiftISYTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				99F8550B1E5CDE3800AB3D71 /* Debug */,
+				99F8550C1E5CDE3800AB3D71 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};
