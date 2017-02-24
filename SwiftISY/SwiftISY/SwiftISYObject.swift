@@ -51,6 +51,14 @@ public class SwiftISYObject {
     // nothing to do
   }
   
+  ///
+  /// Checks for valid values in an instance of this class.
+  ///
+  /// - Returns: `success` - `true` if the object has valid properties; `false` otherwise. `errors` - Array of `ValidationError` objects; or `nil`.
+  public func validate() -> (success: Bool, errors: [ValidationError]?) {
+    return (true, nil)
+  }
+
   /*
    * XML Server Functions
    */
@@ -159,14 +167,44 @@ public class SwiftISYObject {
 ///
 public class SwiftISYHost: SwiftISYObject {
   
-  fileprivate struct Keys {
-    static let hosts = "hosts"
-    static let id = "id"
-    static let friendlyName = "friendlyName"
-    static let host = "host"
-    static let alternativeHost = "alternativeHost"
-    static let user = "user"
-    static let password = "password"
+  public enum Fields {
+    
+    case hosts
+    case id
+    case friendlyName
+    case host
+    case alternativeHost
+    case user
+    case password
+    
+    var key: String {
+      get {
+        switch self {
+        case .hosts: return "hosts"
+        case .id: return "id"
+        case .friendlyName: return "friendlyName"
+        case .host: return "host"
+        case .alternativeHost: return "alternativeHost"
+        case .user: return "user"
+        case .password: return "password"
+        }
+      }
+    }
+
+    var localizedString: String {
+      get {
+        switch self {
+        case .hosts: return "Hosts"
+        case .id: return "Id"
+        case .friendlyName: return "Friendly Name"
+        case .host: return "Host"
+        case .alternativeHost: return "Alternative Host"
+        case .user: return "User"
+        case .password: return "Password"
+        }
+      }
+    }
+    
   }
   
   /// Unique identifier for this host.  Or the host name if an id was not supplied.
@@ -240,7 +278,7 @@ public class SwiftISYHost: SwiftISYObject {
     var array: [[String: Any]]?
     switch persistentStorage {
     case .userDefaults:
-      array = UserDefaults.standard.array(forKey: Keys.hosts) as? [[String: Any]]
+      array = UserDefaults.standard.array(forKey: Fields.hosts.key) as? [[String: Any]]
     }
     
     // process hosts in array
@@ -292,7 +330,7 @@ public class SwiftISYHost: SwiftISYObject {
     switch persistentStorage {
     case .userDefaults:
       let ud = UserDefaults.standard
-      ud.set(array, forKey: Keys.hosts)
+      ud.set(array, forKey: Fields.hosts.key)
       ud.synchronize()
     }
   }
@@ -360,11 +398,11 @@ public class SwiftISYHost: SwiftISYObject {
   }
   
   override public func load(object: [String: Any]) {
-    _id = object[Keys.id] as? String
-    friendlyName = object[Keys.friendlyName] as? String ?? ""
-    host = object[Keys.host] as? String ?? ""
-    alternativeHost = object[Keys.alternativeHost] as? String ?? ""
-    user = object[Keys.user] as? String ?? ""
+    _id = object[Fields.id.key] as? String
+    friendlyName = object[Fields.friendlyName.key] as? String ?? ""
+    host = object[Fields.host.key] as? String ?? ""
+    alternativeHost = object[Fields.alternativeHost.key] as? String ?? ""
+    user = object[Fields.user.key] as? String ?? ""
   }
   
   ///
@@ -374,11 +412,11 @@ public class SwiftISYHost: SwiftISYObject {
   ///
   override public var jsonObject: [String: Any] {
     get {
-      return [Keys.id:id,
-              Keys.friendlyName:friendlyName,
-              Keys.host:host,
-              Keys.alternativeHost:alternativeHost,
-              Keys.user:user]
+      return [Fields.id.key:id,
+              Fields.friendlyName.key:friendlyName,
+              Fields.host.key:host,
+              Fields.alternativeHost.key:alternativeHost,
+              Fields.user.key:user]
     }
   }
 
@@ -402,6 +440,15 @@ public class SwiftISYHost: SwiftISYObject {
     return ("Basic \(encoded)", nil)
   }
 
+  override public func validate() -> (success: Bool, errors: [ValidationError]?) {
+    var errors: [ValidationError] = []
+    if friendlyName.lengthOfBytes(using: .utf8) == 0 { errors.append(ValidationError(kind: .required, field: Fields.friendlyName.key, friendlyName: Fields.friendlyName.localizedString)) }
+    else if host.lengthOfBytes(using: .utf8) == 0 { errors.append(ValidationError(kind: .required, field: Fields.host.key, friendlyName: Fields.host.localizedString)) }
+    else if user.lengthOfBytes(using: .utf8) == 0 { errors.append(ValidationError(kind: .required, field: Fields.user.key, friendlyName: Fields.user.localizedString)) }
+    else if password.lengthOfBytes(using: .utf8) == 0 { errors.append(ValidationError(kind: .required, field: Fields.password.key, friendlyName: Fields.password.localizedString)) }
+    return (true, nil)
+  }
+  
 }
 
 ///

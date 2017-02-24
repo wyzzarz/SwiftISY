@@ -386,5 +386,47 @@ public struct SwiftISYError: Error {
     self.kind = .http
     self.httpStatusCode = httpStatusCode
   }
- 
+  
+}
+
+public struct ValidationError: Error {
+  
+  public enum Kind {
+    case required
+    case tooLong
+    case tooShort
+  }
+  
+  public let kind: Kind
+  public let field: String
+  public let friendlyName: String
+  public let maxLength: UInt
+  public let minLength: UInt
+  
+  public init(kind: Kind, field: String, friendlyName: String) {
+    self.kind = kind
+    self.field = field
+    self.friendlyName = friendlyName
+    maxLength = 0
+    minLength = 0
+  }
+
+  public init(kind: Kind, field: String, friendlyName: String, minLength: UInt, maxLength: UInt) {
+    self.kind = kind
+    self.field = field
+    self.friendlyName = friendlyName
+    self.minLength = minLength
+    self.maxLength = maxLength
+  }
+
+  var localizedDescription: String {
+    get {
+      switch kind {
+      case .required: return "\(friendlyName.localizedCapitalized) is required."
+      case .tooLong: return "\(friendlyName.localizedCapitalized) should be at most \(maxLength) characters."
+      case .tooShort: return "\(friendlyName.localizedCapitalized) should be at least \(maxLength) characters."
+      }
+    }
+  }
+  
 }
