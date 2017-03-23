@@ -12,6 +12,7 @@
 		99863AC61E4ECF15001DAB3B /* SwiftISYRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC51E4ECF15001DAB3B /* SwiftISYRequest.swift */; };
 		99863AC91E4ECF38001DAB3B /* SwiftISYParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC71E4ECF38001DAB3B /* SwiftISYParser.swift */; };
 		99863ACA1E4ECF38001DAB3B /* SwiftISYObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC81E4ECF38001DAB3B /* SwiftISYObject.swift */; };
+		99E4D3FD1E8378850054040C /* SwiftCollection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99E4D3FC1E8378850054040C /* SwiftCollection.framework */; };
 		99F855061E5CDE3800AB3D71 /* SwiftISYHostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F855051E5CDE3800AB3D71 /* SwiftISYHostTests.swift */; };
 		99F855081E5CDE3800AB3D71 /* SwiftISY.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99863A801E4D6C0D001DAB3B /* SwiftISY.framework */; };
 /* End PBXBuildFile section */
@@ -37,6 +38,7 @@
 		99863AC71E4ECF38001DAB3B /* SwiftISYParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYParser.swift; sourceTree = "<group>"; };
 		99863AC81E4ECF38001DAB3B /* SwiftISYObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYObject.swift; sourceTree = "<group>"; };
 		99E4D3F91E83773F0054040C /* Cartfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Cartfile; sourceTree = "<group>"; };
+		99E4D3FC1E8378850054040C /* SwiftCollection.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftCollection.framework; path = Carthage/Build/iOS/SwiftCollection.framework; sourceTree = "<group>"; };
 		99F855031E5CDE3800AB3D71 /* SwiftISYTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftISYTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		99F855051E5CDE3800AB3D71 /* SwiftISYHostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftISYHostTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -46,6 +48,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				99E4D3FD1E8378850054040C /* SwiftCollection.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -67,6 +70,7 @@
 				99863A821E4D6C0D001DAB3B /* SwiftISY */,
 				99F855041E5CDE3800AB3D71 /* SwiftISYTests */,
 				99863A811E4D6C0D001DAB3B /* Products */,
+				99E4D3FB1E8378850054040C /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -100,6 +104,14 @@
 				99863A841E4D6C0D001DAB3B /* Info.plist */,
 			);
 			name = Metadata;
+			sourceTree = "<group>";
+		};
+		99E4D3FB1E8378850054040C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				99E4D3FC1E8378850054040C /* SwiftCollection.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		99F855041E5CDE3800AB3D71 /* SwiftISYTests */ = {
@@ -224,6 +236,7 @@
 			files = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/Carthage/Build/iOS/SwiftCollection.framework",
 			);
 			name = Carthage;
 			outputPaths = (
@@ -369,6 +382,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = SwiftISY/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -390,6 +407,10 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = SwiftISY/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
