@@ -36,6 +36,7 @@
 		99863AC51E4ECF15001DAB3B /* SwiftISYRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYRequest.swift; sourceTree = "<group>"; };
 		99863AC71E4ECF38001DAB3B /* SwiftISYParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYParser.swift; sourceTree = "<group>"; };
 		99863AC81E4ECF38001DAB3B /* SwiftISYObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYObject.swift; sourceTree = "<group>"; };
+		99E4D3F91E83773F0054040C /* Cartfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Cartfile; sourceTree = "<group>"; };
 		99F855031E5CDE3800AB3D71 /* SwiftISYTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftISYTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		99F855051E5CDE3800AB3D71 /* SwiftISYHostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftISYHostTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -93,6 +94,7 @@
 		99863AAB1E4D70ED001DAB3B /* Metadata */ = {
 			isa = PBXGroup;
 			children = (
+				99E4D3F91E83773F0054040C /* Cartfile */,
 				99863AAC1E4D714A001DAB3B /* LICENSE */,
 				99863AAD1E4D714A001DAB3B /* README.md */,
 				99863A841E4D6C0D001DAB3B /* Info.plist */,
@@ -130,6 +132,7 @@
 				99863A7C1E4D6C0D001DAB3B /* Frameworks */,
 				99863A7D1E4D6C0D001DAB3B /* Headers */,
 				99863A7E1E4D6C0D001DAB3B /* Resources */,
+				99E4D3FA1E83779D0054040C /* Carthage */,
 			);
 			buildRules = (
 			);
@@ -213,6 +216,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		99E4D3FA1E83779D0054040C /* Carthage */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = Carthage;
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/usr/local/bin/carthage copy-frameworks";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		99863A7B1E4D6C0D001DAB3B /* Sources */ = {
@@ -435,6 +455,7 @@
 				99F8550C1E5CDE3800AB3D71 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
