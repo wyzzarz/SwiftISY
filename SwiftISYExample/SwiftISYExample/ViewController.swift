@@ -36,12 +36,9 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     super.viewDidLoad()
     
     // add table
+    tableView.frame = UIEdgeInsetsInsetRect(self.view.frame, UIEdgeInsetsMake(20, 0, 0, 0))
     tableView.dataSource = self
     tableView.delegate = self
-    var frame = self.view.frame
-    frame.origin.y = 20
-    frame.size.height -= frame.origin.y
-    tableView.frame = frame
     self.view.addSubview(tableView)
     
     // get nodes

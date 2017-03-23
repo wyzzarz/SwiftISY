@@ -19,13 +19,12 @@
 import Foundation
 
 ///
-/// Instances of The SwiftISYParser class parses the XML results returned by requests to 
-/// ISY devices.
+/// Instances of `SwiftISYParser` parses the XML results returned by requests to ISY devices.
 ///
-class SwiftISYParser: NSObject, XMLParserDelegate {
+internal class SwiftISYParser: NSObject {
   
   // XML
-  var parser: XMLParser?
+  var parser: XMLParser
   var completion: ((_ objects: SwiftISYObjects) -> Void)?
   var texts: [String] = []
   var attributes: [[String: String]] = []
@@ -50,14 +49,22 @@ class SwiftISYParser: NSObject, XMLParserDelegate {
   var currentResponse: SwiftISYResponse?
   
   init(data: Data) {
-    super.init()
     parser = XMLParser(data: data)
-    parser!.delegate = self
+    super.init()
+    parser.delegate = self
   }
+  
+}
+
+// -------------------------------------------------------------------------------------------------
+// MARK: - XMLParser
+// -------------------------------------------------------------------------------------------------
+
+extension SwiftISYParser: XMLParserDelegate {
 
   func parse(completion: @escaping (_ objects: SwiftISYObjects) -> Void) -> SwiftISYParser {
     self.completion = completion
-    parser!.parse()
+    parser.parse()
     return self
   }
   
@@ -73,17 +80,17 @@ class SwiftISYParser: NSObject, XMLParserDelegate {
     attributes.append(attributeDict)
     
     // process this element
-    if elementName == SwiftISYConstants.Elements.group {
+    if elementName == SwiftISY.Elements.group {
       // handle group
       currentGroup = SwiftISYGroup(elementName: elementName, attributes: attributeDict)
       objects.groups.append(currentGroup!)
       isProcessingGroup = true
-    } else if elementName == SwiftISYConstants.Elements.node {
+    } else if elementName == SwiftISY.Elements.node {
       // handle node
       currentNode = SwiftISYNode(elementName: elementName, attributes: attributeDict)
       objects.nodes.append(currentNode!)
       isProcessingNode = true
-    } else if elementName == SwiftISYConstants.Elements.restResponse {
+    } else if elementName == SwiftISY.Elements.restResponse {
       // handle rest response
       currentResponse = SwiftISYResponse(elementName: elementName, attributes: attributeDict)
       objects.responses.append(currentResponse!)
@@ -107,11 +114,11 @@ class SwiftISYParser: NSObject, XMLParserDelegate {
     let attributesDict = attributes.removeLast()
     
     // process this element including any text and attributes
-    if elementName == SwiftISYConstants.Elements.group {
+    if elementName == SwiftISY.Elements.group {
       // process group
       currentGroup = nil
       isProcessingGroup = false
-    } else if elementName == SwiftISYConstants.Elements.node {
+    } else if elementName == SwiftISY.Elements.node {
       // process node
       defer {
         currentNode = nil
@@ -121,7 +128,7 @@ class SwiftISYParser: NSObject, XMLParserDelegate {
       guard let node = currentNode else { return }
       guard let status = currentStatus else { return }
       objects.statuses[node.address] = status
-    } else if elementName == SwiftISYConstants.Elements.restResponse {
+    } else if elementName == SwiftISY.Elements.restResponse {
       // process rest response
       currentResponse = nil
       isProcessingResponse = false
@@ -131,7 +138,7 @@ class SwiftISYParser: NSObject, XMLParserDelegate {
       group.update(elementName: elementName, attributes: attributesDict, text: text)
     } else if isProcessingNode {
       // handle node properties
-      if elementName == SwiftISYConstants.Elements.property && SwiftISYStatus.canHandle(elementName: elementName, attributes: attributesDict) {
+      if elementName == SwiftISY.Elements.property && SwiftISYStatus.canHandle(elementName: elementName, attributes: attributesDict) {
         currentStatus = SwiftISYStatus(elementName: elementName, attributes: attributesDict)
       } else {
         guard let node = currentNode else { return }
@@ -143,5 +150,30 @@ class SwiftISYParser: NSObject, XMLParserDelegate {
       response.update(elementName: elementName, attributes: attributesDict, text: text)
     }
   }
+  
+}
+
+// -------------------------------------------------------------------------------------------------
+// MARK: - XMLParser
+// -------------------------------------------------------------------------------------------------
+
+public protocol SwiftISYParserProtocol {
+  
+  ///
+  /// Creates an instance of this class from an XML parser when an element is encountered.
+  ///
+  /// - Parameter elementName: Name for this XML element.
+  /// - Parameter attributes: Attributes for this XML element.
+  ///
+  init(elementName: String, attributes: [String: String])
+
+  ///
+  /// Updates this object once the XML parser completes processing an element.
+  ///
+  /// - Parameter elementName: Name for this XML element.
+  /// - Parameter attributes: Attributes for this XML element.
+  /// - Parameter text: Text for this XML element.  Maybe be an empty string.
+  ///
+  func update(elementName: String, attributes: [String: String], text: String)
   
 }

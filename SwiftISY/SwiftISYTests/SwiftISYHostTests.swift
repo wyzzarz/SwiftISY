@@ -19,6 +19,7 @@
 import XCTest
 import SwiftISY
 
+/*
 class SwiftISYHostTests: XCTestCase {
 
   struct Constants {
@@ -106,3 +107,4 @@ class SwiftISYHostTests: XCTestCase {
   }
 
 }
+*/

@@ -26,10 +26,10 @@ import Foundation
 // MARK: -
 
 ///
-/// The SwiftISYRequest class provides an API to connect to ISY series devices to fetch data and
-/// to issue commands.
+/// `SwiftISYRequest` provides an API to connect to ISY series devices to fetch data and issue
+/// commands.
 ///
-public class SwiftISYRequest {
+public struct SwiftISYRequest {
   
   ///
   /// Results from completion of a request.
@@ -44,7 +44,7 @@ public class SwiftISYRequest {
     public var success: Bool = false
     
     /// Contains `Error` if the request failed, `nil` otherwise.
-    public var error: SwiftISYError?
+    public var error: SwiftISY.RequestError?
     
     /// Contains `SwiftISYObjects` if the request was successful, `nil` otherwise.
     public var objects: SwiftISYObjects?
@@ -94,32 +94,35 @@ public class SwiftISYRequest {
   ///
   /// - Parameter host: Host for the request.
   ///
-  public convenience init(host: SwiftISYHost) {
-    self.init()
+  public init(host: SwiftISYHost) {
     self.host = host
   }
   
-  // ---------------------------------------------------------------------------
-  // MARK: - REQUEST
-  // ---------------------------------------------------------------------------
+}
 
-  private func makeRequest(command: String) -> (URLRequest?, SwiftISYError?) {
+// -------------------------------------------------------------------------------------------------
+// MARK: - REQUEST
+// -------------------------------------------------------------------------------------------------
+
+extension SwiftISYRequest {
+  
+  private func makeRequest(command: String) -> (URLRequest?, SwiftISY.RequestError?) {
     // ensure there is a command
-    if command.lengthOfBytes(using: .utf8) == 0 { return (nil, SwiftISYError(kind: .invalidCommand)) }
+    if command.characters.count == 0 { return (nil, SwiftISY.RequestError(kind: .invalidCommand)) }
 
     // ensure there is a host
-    guard let host = self.host else { return (nil, SwiftISYError(kind: .invalidHost)) }
+    guard let host = self.host else { return (nil, SwiftISY.RequestError(kind: .invalidHost)) }
 
     // get address for this host
     let address = host.host
-    if address.lengthOfBytes(using: .utf8) == 0 { return (nil, SwiftISYError(kind: .invalidHost)) }
+    if address.characters.count == 0 { return (nil, SwiftISY.RequestError(kind: .invalidHost)) }
 
     // get authorization header for this host
     let (authorization, error) = host.authorization()
     if error != nil { return (nil, error) }
 
     // get url to connect to this host
-    guard let url = URL(string: "http://\(address)/\(command)") else { return (nil, SwiftISYError(kind: .badRequest)) }
+    guard let url = URL(string: "http://\(address)/\(command)") else { return (nil, SwiftISY.RequestError(kind: .badRequest)) }
     
     // create a request and include the authorization header
     var request = URLRequest(url: url)
@@ -139,7 +142,7 @@ public class SwiftISYRequest {
   
   private func handleResponse(data: Data?, response: HTTPURLResponse, completion: @escaping Completion) {
     // handle successful request
-    if let statusCode = SwiftISYConstants.HttpStatusCodes(rawValue: response.statusCode) {
+    if let statusCode = SwiftISY.HttpStatusCodes(rawValue: response.statusCode) {
       if statusCode.isSuccessful && data != nil {
         parseResponse(data: data!, response: response, completion: completion)
         return
@@ -148,10 +151,10 @@ public class SwiftISYRequest {
     
     // otherwise fail
     let localizedString = HTTPURLResponse.localizedString(forStatusCode: response.statusCode)
-    handleError(error: SwiftISYError(localizedDescription: localizedString, object: response), completion: completion)
+    handleError(error: SwiftISY.RequestError(localizedDescription: localizedString, object: response), completion: completion)
   }
   
-  private func handleError(error: SwiftISYError?, completion: @escaping Completion) {
+  private func handleError(error: SwiftISY.RequestError?, completion: @escaping Completion) {
     if let anError = error {
       print(anError.localizedDescription)
     } else {
@@ -162,7 +165,7 @@ public class SwiftISYRequest {
     }
   }
 
-  private func executeRest(command: String, completion: @escaping Completion) {
+  fileprivate func executeRest(command: String, completion: @escaping Completion) {
     // build request for rest command and include authorization
     let (request, error) = makeRequest(command: command)
     if error != nil {
@@ -174,17 +177,20 @@ public class SwiftISYRequest {
     session.dataTask(with: request!) { (data, response, error) in
       let httpResponse = response as? HTTPURLResponse?
       if error != nil {
-        self.handleError(error: SwiftISYError(error: error!), completion: completion)
+        self.handleError(error: SwiftISY.RequestError(error: error!), completion: completion)
       } else {
         self.handleResponse(data: data, response: httpResponse!!, completion: completion)
       }
       }.resume()
   }
-  
-  // ---------------------------------------------------------------------------
-  // MARK: - QUERY
-  // ---------------------------------------------------------------------------
 
+}
+
+// -------------------------------------------------------------------------------------------------
+// MARK: - QUERY
+// -------------------------------------------------------------------------------------------------
+
+extension SwiftISYRequest {
   
   ///
   /// Gets all nodes, groups and statuses from the host.
@@ -204,9 +210,13 @@ public class SwiftISYRequest {
     executeRest(command: "rest/status", completion: completion)
   }
   
-  // ---------------------------------------------------------------------------
-  // MARK: - COMMAND
-  // ---------------------------------------------------------------------------
+}
+
+// -------------------------------------------------------------------------------------------------
+// MARK: - COMMAND
+// -------------------------------------------------------------------------------------------------
+
+extension SwiftISYRequest {
   
   ///
   /// Executes a command for the specified node on the host.
@@ -215,7 +225,7 @@ public class SwiftISYRequest {
   /// - Parameter command: Command to be issued for the node.
   /// - Parameter completion: The closure to execute once the network request has completed.
   ///
-  private func deviceCommand(address: String, command: String, completion: @escaping Completion) {
+  fileprivate func deviceCommand(address: String, command: String, completion: @escaping Completion) {
     let encodedAddress = address.addingPercentEncoding(withAllowedCharacters:.urlHostAllowed)!
     executeRest(command: "rest/nodes/\(encodedAddress)/cmd/\(command)", completion: completion)
   }

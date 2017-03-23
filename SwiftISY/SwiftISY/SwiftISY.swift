@@ -1,5 +1,5 @@
 //
-//  SwiftISYConstants.swift
+//  SwiftISY.swift
 //
 //  Copyright 2017 Warner Zee
 //
@@ -18,24 +18,22 @@
 
 import Foundation
 
-extension NSNotification.Name {
-  static let SwiftISYControllerDidFetchObjects = NSNotification.Name("SwiftISYControllerDidFetchObjects")
-  static let SwiftISYControllerDidFetchStatuses = NSNotification.Name("SwiftISYControllerDidFetchStatuses")
-}
+// -------------------------------------------------------------------------------------------------
+// MARK: - Constants
+// -------------------------------------------------------------------------------------------------
 
-public struct SwiftISYConstants {
+
+public struct SwiftISY {
   
   /// Bundle Id for this framework.
   public static let bundleId = "com.wyz.SwiftISY"
   
   /// Name for this framework.
   public static var name: String {
-    get {
-      let info = Bundle(identifier: bundleId)!.infoDictionary!
-      let name = info["CFBundleName"] as! String
-      let version = info["CFBundleShortVersionString"] as! String
-      return "\(name) v\(version)"
-    }
+    let info = Bundle(identifier: bundleId)!.infoDictionary!
+    let name = info["CFBundleName"] as! String
+    let version = info["CFBundleShortVersionString"] as! String
+    return "\(name) v\(version)"
   }
   
   ///
@@ -114,6 +112,7 @@ public struct SwiftISYConstants {
   /// Standard HTTP status codes.
   ///
   public enum HttpStatusCodes: Int {
+    
     // Informational (1xx)
     case shouldContinue = 100
     case switchingProtocols = 101
@@ -279,154 +278,165 @@ public struct SwiftISYConstants {
   
 }
 
-///
-/// The `SwiftISYError` class includes errors used in this framework.
-///
-public struct SwiftISYError: Error {
+// -------------------------------------------------------------------------------------------------
+// MARK: - Errors
+// -------------------------------------------------------------------------------------------------
+
+extension SwiftISY {
   
-  /// Kinds of errors.
-  public enum Kind {
-    case none
-    case invalidUser
-    case invalidPassword
-    case invalidCredential
-    case invalidCommand
-    case invalidHost
-    case badRequest
-    case http
-  }
-  
-  /// Kind of error.
-  public let kind: Kind
-  
-  /// Object associated with this error.
-  public var object: Any?
-  
-  /// Returns a localized description for this error.
-  fileprivate var _localizedDescription: String = ""
-  public var localizedDescription: String {
-    get {
-      switch kind {
-      case .none: return _localizedDescription
-      case .invalidUser: return "Invalid or Missing Username"
-      case .invalidPassword: return "Invalid or Missing Password"
-      case .invalidCredential: return "Invalid Username or Password"
-      case .invalidCommand: return "Invalid or Missing Command"
-      case .invalidHost: return "Invalid or Missing Host"
-      case .badRequest: return "Bad Request"
-      case .http: return httpStatusCode!.description
+  ///
+  /// `SwiftISYError` includes errors used in this framework.
+  ///
+  public struct RequestError: Error {
+    
+    /// Kinds of errors.
+    public enum Kind {
+      case none
+      case invalidUser
+      case invalidPassword
+      case invalidCredential
+      case invalidCommand
+      case invalidHost
+      case badRequest
+      case http
+    }
+    
+    /// Kind of error.
+    public let kind: Kind
+    
+    /// Object associated with this error.
+    public var object: Any?
+    
+    /// Returns a localized description for this error.
+    fileprivate var _localizedDescription: String = ""
+    public var localizedDescription: String {
+      get {
+        switch kind {
+        case .none: return _localizedDescription
+        case .invalidUser: return "Invalid or Missing Username"
+        case .invalidPassword: return "Invalid or Missing Password"
+        case .invalidCredential: return "Invalid Username or Password"
+        case .invalidCommand: return "Invalid or Missing Command"
+        case .invalidHost: return "Invalid or Missing Host"
+        case .badRequest: return "Bad Request"
+        case .http: return httpStatusCode!.description
+        }
+      }
+      set {
+        _localizedDescription = newValue
       }
     }
-    set {
-      _localizedDescription = newValue
+    
+    ///
+    /// Creates a `SwiftISYError` with this kind of error.
+    ///
+    /// - Parameter kind: Kind of error.
+    ///
+    public init(kind: Kind) {
+      self.kind = kind
+      self.httpStatusCode = nil
     }
+    
+    ///
+    /// Creates a `SwiftISYError` with this localized description.  Kind of error defaults to `none`.
+    ///
+    /// - Parameter localizedDescription: Localized description for this error.
+    /// - Parameter object: Object for this error or nil if there is none.
+    ///
+    public init(localizedDescription: String, object: Any?) {
+      self.kind = .none
+      self.object = object
+      self.httpStatusCode = nil
+      self.localizedDescription = localizedDescription
+    }
+    
+    ///
+    /// Creates a `SwiftISYError` with the localized description from this error.  Kind of error
+    /// defaults to `none`.
+    ///
+    /// - Parameter error: Error to be applied.
+    ///
+    public init(error: Error) {
+      self.init(localizedDescription: error.localizedDescription, object: nil)
+    }
+    
+    /*
+     * HTTP Error
+     */
+    
+    /// HTTP status code for this error.
+    public let httpStatusCode: SwiftISY.HttpStatusCodes?
+    
+    ///
+    /// If the HTTP status code is in the range 4xx or 5xx, this function returns an instance of
+    /// `SwiftISYError` for HTTP and this status code.
+    ///
+    /// - Parameter statusCode: HTTP status code.
+    /// - Returns: An instance of `SwiftISYError` if the HTTP status code is an error.
+    ///
+    public static func httpError(statusCode: Int) -> SwiftISY.RequestError? {
+      guard let sc = SwiftISY.HttpStatusCodes(rawValue: statusCode) else { return nil }
+      return SwiftISY.RequestError(httpStatusCode: sc)
+    }
+    
+    ///
+    /// If the HTTP status code is a client or server error, a `SwiftISYError` is created for HTTP
+    /// and this status code.
+    ///
+    /// - Parameter localizedDescription: Localized description for this error.
+    /// - Parameter object: Object for this error or nil if there is none.
+    ///
+    public init?(httpStatusCode: SwiftISY.HttpStatusCodes) {
+      if !httpStatusCode.isError { return nil }
+      self.kind = .http
+      self.httpStatusCode = httpStatusCode
+    }
+    
   }
   
   ///
-  /// Creates a `SwiftISYError` with this kind of error.
+  /// `ValidationError` includes validation errors for objects in this framework.
   ///
-  /// - Parameter kind: Kind of error.
-  ///
-  public init(kind: Kind) {
-    self.kind = kind
-    self.httpStatusCode = nil
-  }
-  
-  ///
-  /// Creates a `SwiftISYError` with this localized description.  Kind of error defaults to `none`.
-  ///
-  /// - Parameter localizedDescription: Localized description for this error.
-  /// - Parameter object: Object for this error or nil if there is none.
-  ///
-  public init(localizedDescription: String, object: Any?) {
-    self.kind = .none
-    self.object = object
-    self.httpStatusCode = nil
-    self.localizedDescription = localizedDescription
-  }
-  
-  ///
-  /// Creates a `SwiftISYError` with the localized description from this error.  Kind of error 
-  /// defaults to `none`.
-  ///
-  /// - Parameter error: Error to be applied.
-  ///
-  public init(error: Error) {
-    self.init(localizedDescription: error.localizedDescription, object: nil)
-  }
-  
-  /*
-   * HTTP Error
-   */
-  
-  /// HTTP status code for this error.
-  public let httpStatusCode: SwiftISYConstants.HttpStatusCodes?
-
-  ///
-  /// If the HTTP status code is in the range 4xx or 5xx, this function returns an instance of 
-  /// `SwiftISYError` for HTTP and this status code.
-  ///
-  /// - Parameter statusCode: HTTP status code.
-  /// - Returns: An instance of `SwiftISYError` if the HTTP status code is an error.
-  ///
-  public static func httpError(statusCode: Int) -> SwiftISYError? {
-    guard let sc = SwiftISYConstants.HttpStatusCodes(rawValue: statusCode) else { return nil }
-    return SwiftISYError(httpStatusCode: sc)
-  }
-  
-  ///
-  /// If the HTTP status code is a client or server error, a `SwiftISYError` is created for HTTP
-  /// and this status code.
-  ///
-  /// - Parameter localizedDescription: Localized description for this error.
-  /// - Parameter object: Object for this error or nil if there is none.
-  ///
-  public init?(httpStatusCode: SwiftISYConstants.HttpStatusCodes) {
-    if !httpStatusCode.isError { return nil }
-    self.kind = .http
-    self.httpStatusCode = httpStatusCode
-  }
-  
-}
-
-public struct ValidationError: Error {
-  
-  public enum Kind {
-    case required
-    case tooLong
-    case tooShort
-  }
-  
-  public let kind: Kind
-  public let field: String
-  public let friendlyName: String
-  public let maxLength: UInt
-  public let minLength: UInt
-  
-  public init(kind: Kind, field: String, friendlyName: String) {
-    self.kind = kind
-    self.field = field
-    self.friendlyName = friendlyName
-    maxLength = 0
-    minLength = 0
-  }
-
-  public init(kind: Kind, field: String, friendlyName: String, minLength: UInt, maxLength: UInt) {
-    self.kind = kind
-    self.field = field
-    self.friendlyName = friendlyName
-    self.minLength = minLength
-    self.maxLength = maxLength
-  }
-
-  var localizedDescription: String {
-    get {
-      switch kind {
-      case .required: return "\(friendlyName.localizedCapitalized) is required."
-      case .tooLong: return "\(friendlyName.localizedCapitalized) should be at most \(maxLength) characters."
-      case .tooShort: return "\(friendlyName.localizedCapitalized) should be at least \(maxLength) characters."
+  public struct ValidationError: Error {
+    
+    public enum Kind {
+      case required
+      case tooLong
+      case tooShort
+    }
+    
+    public let kind: Kind
+    public let field: String
+    public let friendlyName: String
+    public let maxLength: UInt
+    public let minLength: UInt
+    
+    public init(kind: Kind, field: String, friendlyName: String) {
+      self.kind = kind
+      self.field = field
+      self.friendlyName = friendlyName
+      maxLength = 0
+      minLength = 0
+    }
+    
+    public init(kind: Kind, field: String, friendlyName: String, minLength: UInt, maxLength: UInt) {
+      self.kind = kind
+      self.field = field
+      self.friendlyName = friendlyName
+      self.minLength = minLength
+      self.maxLength = maxLength
+    }
+    
+    var localizedDescription: String {
+      get {
+        switch kind {
+        case .required: return "\(friendlyName.localizedCapitalized) is required."
+        case .tooLong: return "\(friendlyName.localizedCapitalized) should be at most \(maxLength) characters."
+        case .tooShort: return "\(friendlyName.localizedCapitalized) should be at least \(maxLength) characters."
+        }
       }
     }
+    
   }
   
 }
