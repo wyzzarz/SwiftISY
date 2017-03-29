@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<nodes>
+  <node id="24 DD AD 1">
+    <property id="ST" value="75" formatted="30" uom="%/on/off" />
+  </node>
+  <node id="24 EF 96 1">
+    <property id="ST" value="255" formatted="On" uom="on/off" />
+  </node>
+  <node id="24 EF 96 3">
+    <property id="ST" value="0" formatted="Off" uom="on/off" />
+  </node>
+  <node id="24 EF 96 4">
+    <property id="ST" value="0" formatted="Off" uom="on/off" />
+  </node>
+</nodes>

@@ -364,7 +364,7 @@ public class SwiftISYResponse: SCDocument, SwiftISYParserProtocol {
   public var succeeded = false
   
   /// Status code for the command.
-  public var status: UInt = 0
+  public var status: SwiftISY.HttpStatusCodes?
 
   public required convenience init(elementName: String, attributes: [String: String]) {
     self.init()
@@ -373,7 +373,7 @@ public class SwiftISYResponse: SCDocument, SwiftISYParserProtocol {
   
   public func update(elementName: String, attributes: [String : String], text: String = "") {
     switch elementName {
-    case SwiftISY.Elements.status: status = UInt(text) ?? 0
+    case SwiftISY.Elements.status: status = SwiftISY.HttpStatusCodes(rawValue: Int(text) ?? 0)
     default: break
     }
   }

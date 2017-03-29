@@ -175,12 +175,12 @@ extension SwiftISYRequest {
     
     // perform the request
     session.dataTask(with: request!) { (data, response, error) in
-      let httpResponse = response as? HTTPURLResponse?
-      if error != nil {
+      guard error == nil else {
         self.handleError(error: SwiftISY.RequestError(error: error!), completion: completion)
-      } else {
-        self.handleResponse(data: data, response: httpResponse!!, completion: completion)
+        return
       }
+      let httpResponse = response as? HTTPURLResponse?
+      self.handleResponse(data: data, response: httpResponse!!, completion: completion)
       }.resume()
   }
 
