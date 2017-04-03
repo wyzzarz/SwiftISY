@@ -40,12 +40,12 @@ public struct SwiftISYObjects {
 // MARK: - Host
 // -------------------------------------------------------------------------------------------------
 
-public class SwiftISYHosts: SCOrderedSet<SwiftISYHost>, SCJsonProtocol {
+public class SwiftISYHosts: SCOrderedSet<SwiftISYHost> {
   
-  public func load(jsonObject json: AnyObject) throws -> AnyObject? {
+  override open func load(jsonObject json: AnyObject) throws -> AnyObject? {
     if let array = json as? [AnyObject] {
       for item in array {
-        try? append(document: SwiftISYHost(json: item))
+        try append(document: SwiftISYHost(json: item))
       }
     }
     return json
@@ -74,24 +74,27 @@ public class SwiftISYHost: SCDocument {
   /// Username for authentication.
   public var user = ""
   
-  /// Password for authentication.
-  fileprivate var _password: String?
+  /// Returns a password for authentication.
+  ///
+  /// This can be:
+  ///   * The password used when initializing the host object.
+  ///   * A password provided from `providePassword()`.
+  ///   * Or an empty string if there is no password.
   public var password: String {
-    get {
-      if let password = _password {
-        if password.characters.count > 0 { return password }
-      }
-      guard let closure = SwiftISYHost._providePassword else { return "" }
-      _password = closure(self)
-      return _password ?? ""
-    }
+    // return this password
+    if _password != nil && _password!.characters.count > 0 { return _password! }
+    
+    // otherwise try the password provider
+    guard let closure = SwiftISYHost._providePassword else { return "" }
+    return closure(self)
   }
+  fileprivate var _password: String?
   
   ///
   /// Allows the client to return a password to be used for a host.
   ///
   static var _providePassword: ((SwiftISYHost) -> String)?
-  public static func providePassword(closure: @escaping (SwiftISYHost) -> String) {
+  public static func providePassword(_ closure: ((SwiftISYHost) -> String)?) {
     _providePassword = closure
   }
   
@@ -118,35 +121,34 @@ public class SwiftISYHost: SCDocument {
   ///
   /// Initializes a `SwiftISYHost` object with the specified hostname, username and password.
   ///
-  /// - Parameter host: A host name or IP address.
-  /// - Parameter user: A username for authentication.
-  /// - Parameter password: Optional password for authentication.
-  ///
-  public convenience init(host: String, user: String, password: String?) {
-    self.init()
+  /// - Parameters:
+  ///   - id: Optional id.
+  ///   - host: A host name or IP address.
+  ///   - user: A username for authentication.
+  ///   - password: Optional password for authentication.
+  public convenience init(id: SwiftCollection.Id = 0, host: String, user: String, password: String? = nil) {
+    self.init(id: id)
     self.host = host
     self.user = user
     _password = password
   }
   
-  ///
-  /// Initializes a `SwiftISYHost` object with the specified hostname and username.
-  ///
-  /// - Note: `provideHostPassword()` should be set and return a value for the password.
-  ///
-  /// - Parameter host: A host name or IP address.
-  /// - Parameter user: A username for authentication.
-  ///
-  public convenience init(host: String, user: String) {
-    self.init()
-    self.host = host
-    self.user = user
+  open override func jsonObject(willSerializeProperty label: String, value: Any) -> (newLabel: String, newValue: Any?) {
+    guard label == Keys.password else { return (label, value) }
+    return (label, nil)
   }
-
+  
   open override func load(propertyWithName name: String, currentValue: Any, potentialValue: Any, json: AnyObject) {
+    super.load(propertyWithName: name, currentValue: currentValue, potentialValue: potentialValue, json: json)
+    guard let dict = json as? [String: Any] else { return }
+    guard let value = dict[name] as? String else { return }
     switch name {
-    case Keys.friendlyName: break//if let id = (json as? [String: Any])?[Keys.id] as? SwiftCollection.Id { _id = id }
-    default: super.load(propertyWithName: name, currentValue: currentValue, potentialValue: potentialValue, json: json)
+    case Keys.friendlyName: friendlyName = value
+    case Keys.host: host = value
+    case Keys.alternativeHost: alternativeHost = value
+    case Keys.user: user = value
+    case Keys.password: _password = value
+    default: break
     }
   }
 
@@ -158,7 +160,7 @@ extension SwiftISYHost.Keys {
   public static let host = "host"
   public static let alternativeHost = "alternativeHost"
   public static let user = "user"
-  public static let password = "password"
+  public static let password = "_password"
   
 }
 

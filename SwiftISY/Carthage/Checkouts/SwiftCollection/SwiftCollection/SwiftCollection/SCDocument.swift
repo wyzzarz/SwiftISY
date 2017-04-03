@@ -19,99 +19,111 @@
 import Foundation
 
 ///
-/// `SCDocumentProtocol` describes the routines necessary to implement a `SCDocument`.
-///
-/// The goal of `SCDocumentProtocol` is to provide a document holder for use in collections and
-/// provide a primary key, sorting and storage to and retrieval from a persistence store.
-///
-public protocol SCDocumentProtocol: Hashable {
-  
-  /*
-   * -----------------------------------------------------------------------------------------------
-   * MARK: - Id
-   * -----------------------------------------------------------------------------------------------
-   */
-  
-  /// Primary key for this document.  It should be unique across a collection.
-  var id: SwiftCollection.Id { get }
-
-  /// Returns the primary key as a hex string in the format `0000-0000-0000-0000`.
-  var guid: String { get }
-  
-  /// Returns `true` if `id` has a value with a length greater than zero; `false` otherwise.
-  func hasId() -> Bool
-  
-  /// Creates an instance of this class with the specified `id`.
-  ///
-  /// - Parameter id: Primary key to be used.
-  init(id: SwiftCollection.Id)
-  
-}
-
-extension SCDocumentProtocol {
-  
-  public var guid: String {
-    return id.toHexString(groupEvery: 2)
-  }
-  
-  public func hasId() -> Bool {
-    return id > 0
-  }
-
-}
-
-///
 /// The goal of `SCDocument` is to provide a document holder for use in collections and
 /// provide a primary key, sorting and storage to and retrieval from a persistence store.
 ///
-open class SCDocument: SCJsonProtocol {
+open class SCDocument: SCJsonObject {
 
+  /// Keys describing properties for this class.
   public struct Keys {
     
     public static let id = "_id"
     
   }
   
+  /*
+   * -----------------------------------------------------------------------------------------------
+   * MARK: - Id
+   * -----------------------------------------------------------------------------------------------
+   */
+
+  /// Primary key for this document.  It should be unique across a collection.
+  final public var id: SwiftCollection.Id {
+    return _id
+  }
   fileprivate var _id: SwiftCollection.Id = 0
   
+  /// Returns the primary key as a hex string in the format `0000-0000-0000-0000`.
+  final public var guid: String {
+    return id.toHexString(groupEvery: 2)
+  }
+  
+  /// Returns `true` if `id` has a value with a length greater than zero; `false` otherwise.
+  final public func hasId() -> Bool {
+    return id > 0
+  }
+ 
+  /*
+   * -----------------------------------------------------------------------------------------------
+   * MARK: - Initialize
+   * -----------------------------------------------------------------------------------------------
+   */
+
   public required init() {
-    // nothing to do
+    super.init()
+  }
+  
+  public required init(json: AnyObject) throws {
+    try super.init(json: json)
+    // set id, if it exists
+    guard let dict = json as? [String: Any] else { return }
+    guard let anId = dict[Keys.id] as? SwiftCollection.Id else { return }
+    _id = anId
   }
 
+  /// Creates an instance of this class with the specified `id`.
+  ///
+  /// - Parameter id: Primary key to be used.
   public required convenience init(id: SwiftCollection.Id) {
     self.init()
     _id = id
   }
 
-  open func load(propertyWithName name: String, currentValue: Any, potentialValue: Any, json: AnyObject) {
+  /*
+   * -----------------------------------------------------------------------------------------------
+   * MARK: - CustomStringConvertible
+   * -----------------------------------------------------------------------------------------------
+   */
+  
+  override open var description: String {
+    return String(describing: "SCDocument(\(_id))")
+  }
+
+  /*
+   * -----------------------------------------------------------------------------------------------
+   * MARK: - Hashable
+   * -----------------------------------------------------------------------------------------------
+   */
+  
+  override open var hashValue: Int {
+    return _id.hashValue
+  }
+  
+  override open func isEqual(_ object: Any?) -> Bool {
+    guard let object = object as? SCDocument else { return false }
+    return self.id == object.id
+  }
+
+  /*
+   * -----------------------------------------------------------------------------------------------
+   * MARK: - Json
+   * -----------------------------------------------------------------------------------------------
+   */
+  
+  override open func jsonObject() -> AnyObject? {
+    let json = super.jsonObject()
+    guard var dict = super.jsonObject() as? [String: Any] else { return json }
+    if dict[Keys.id] != nil { return json }
+    dict[Keys.id] = _id
+    return dict as AnyObject
+  }
+
+  override open func load(propertyWithName name: String, currentValue: Any, potentialValue: Any, json: AnyObject) {
+    guard let dict = json as? [String: Any] else { return }
     switch name {
-    case Keys.id: if let id = (json as? [String: Any])?[Keys.id] as? SwiftCollection.Id { _id = id }
+    case Keys.id: if let id = dict[name] as? SwiftCollection.Id { _id = id }
     default: break
     }
   }
 
-}
-
-extension SCDocument: SCDocumentProtocol {
-
-  public var id: SwiftCollection.Id {
-    return _id
-  }
-  
-  public var hashValue: Int {
-      return _id.hashValue
-  }
-  
-  public static func == (lhs: SCDocument, rhs: SCDocument) -> Bool {
-    return lhs.id == rhs.id && lhs.id == rhs.id
-  }
-  
-}
-
-extension SCDocument: CustomStringConvertible {
-  
-  public var description: String {
-    return String(describing: "SCDocument(\(_id))")
-  }
-  
 }

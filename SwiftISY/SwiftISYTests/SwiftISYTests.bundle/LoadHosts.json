@@ -1,0 +1,23 @@
+[
+  {
+    "_id": 1, 
+    "alternativeHost": "alternativeHost1-value",
+    "friendlyName": "friendlyName1-value",
+    "host": "host1-value", 
+    "user": "user1-value"
+  }, 
+  {
+    "_id": 2, 
+    "alternativeHost": "alternativeHost2-value",
+    "friendlyName": "friendlyName2-value",
+    "host": "host2-value", 
+    "user": "user2-value"
+  }, 
+  {
+    "_id": 3, 
+    "alternativeHost": "alternativeHost3-value",
+    "friendlyName": "friendlyName3-value", 
+    "host": "host3-value", 
+    "user": "user3-value"
+  }
+]

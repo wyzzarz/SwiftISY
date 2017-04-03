@@ -126,7 +126,7 @@ class SwiftCollectionPersistenceTests: XCTestCase {
 
 extension SwiftCollectionPersistenceTests {
   
-  struct JsonStruct: SCJsonProtocol {
+  final class JsonClass: SCJsonObject {
     
     var str: String?
     var dbl: Double?
@@ -146,10 +146,16 @@ extension SwiftCollectionPersistenceTests {
     var anotherStruct: AnotherStruct?
     var anotherClass: AnotherClass?
     
-    init() {
+    required init() {
+      super.init()
     }
     
-    init(defaults: Bool = false) {
+    required init(json: AnyObject) throws {
+      try super.init(json: json)
+    }
+    
+    convenience init(defaults: Bool = false) {
+      self.init()
       if defaults {
         str = KeyValues.str.value as? String
         dbl = KeyValues.dbl.value as? Double
@@ -171,11 +177,11 @@ extension SwiftCollectionPersistenceTests {
       }
     }
     
-    func jsonObject(willSerializeProperty label: String, value: Any) -> (newLabel: String, newValue: AnyObject?) {
+    override func jsonObject(willSerializeProperty label: String, value: Any) -> (newLabel: String, newValue: Any?) {
       switch label {
       case KeyValues.anotherEnumString.key:
         // reflection cannot be used to get the `rawValue` of an enum; special handling is required.
-        return (label, anotherEnumString?.rawValue as AnyObject?)
+        return (label, anotherEnumString?.rawValue)
       case KeyValues.anotherEnumNumber.key:
         // reflection cannot be used to get the `rawValue` of an enum; special handling is required.
         if let rawValue = anotherEnumNumber?.rawValue {
@@ -185,14 +191,14 @@ extension SwiftCollectionPersistenceTests {
         }
       default: break
       }
-      return (label, value as AnyObject)
+      return super.jsonObject(willSerializeProperty: label, value: value)
     }
     
-    func jsonKey() -> String {
-      return "JsonStructABC"
+    override func storageKey() -> String {
+      return "JsonClassABC"
     }
     
-    public mutating func load(propertyWithName name: String, currentValue: Any, potentialValue: Any, json: AnyObject) {
+    override public func load(propertyWithName name: String, currentValue: Any, potentialValue: Any, json: AnyObject) {
       switch name {
       case KeyValues.str.key: str = potentialValue as? String
       case KeyValues.dbl.key: dbl = (potentialValue as? NSNumber)?.doubleValue
@@ -215,9 +221,9 @@ extension SwiftCollectionPersistenceTests {
 
   }
   
-  func testJsonStruct() {
+  func testJsonClass() {
     // get struct to test
-    let obj = JsonStruct(defaults: true)
+    let obj = JsonClass(defaults: true)
     
     // get JSON object
     guard let json = obj.jsonObject() else { XCTAssert(false); return }
@@ -298,14 +304,14 @@ extension SwiftCollectionPersistenceTests {
   }
   
   func testKeys() {
-    XCTAssertEqual(JsonStruct().jsonKey(), "JsonStructABC")
-    XCTAssertEqual(Struct1().jsonKey(), "Struct1")
-    XCTAssertEqual(Class1().jsonKey(), "Class1")
+    XCTAssertEqual(JsonClass().storageKey(), "JsonClassABC")
+    XCTAssertEqual(Class1().storageKey(), "Class1")
+    XCTAssertEqual(Class2().storageKey(), "Class2")
   }
   
-  func testSaveJsonStruct() {
+  func testSaveJsonClass() {
     // get struct to test
-    let obj = JsonStruct(defaults: true)
+    let obj = JsonClass(defaults: true)
     
     // create expectations
     let se = expectation(description: "Save Failed.")
@@ -314,7 +320,7 @@ extension SwiftCollectionPersistenceTests {
     // load object
     let load = {
       do {
-        var loaded = JsonStruct()
+        let loaded = JsonClass()
         try loaded.load(jsonStorage: .userDefaults, completion: { (success, value) in
           le.fulfill()
           XCTAssertTrue(success)
@@ -379,21 +385,27 @@ extension SwiftCollectionPersistenceTests {
 
 extension SwiftCollectionPersistenceTests {
   
-  struct Struct1: SCJsonProtocol {
+  final class Class1: SCJsonObject {
     
     var a: Int?
     var b: Int?
     
-    init() {
+    required init() {
+      super.init()
     }
     
-    init(defaults: Bool = false) {
+    required init(json: AnyObject) throws {
+      try super.init(json: json)
+    }
+    
+    convenience init(defaults: Bool = false) {
+      self.init()
       if defaults {
         a = 1
       }
     }
     
-    public mutating func load(propertyWithName name: String, currentValue: Any, potentialValue: Any, json: AnyObject) {
+    override func load(propertyWithName name: String, currentValue: Any, potentialValue: Any, json: AnyObject) {
       guard !(potentialValue is NSNull) else { return }
       switch name {
       case "a": a = Int(potentialValue as! NSNumber)
@@ -404,29 +416,35 @@ extension SwiftCollectionPersistenceTests {
     
   }
   
-  class Class1: SCJsonProtocol {
+  final class Class2: SCJsonObject {
     
     var c: Int?
     var d: Int?
-    var struct1: Struct1?
+    var struct1: Class1?
     
     required init() {
+      super.init()
     }
     
-    init(defaults: Bool = false) {
+    required init(json: AnyObject) throws {
+      try super.init(json: json)
+    }
+    
+    convenience init(defaults: Bool = false) {
+      self.init()
       if defaults {
         c = 3
-        struct1 = Struct1(defaults: defaults)
+        struct1 = Class1(defaults: defaults)
       }
     }
     
-    public func load(propertyWithName name: String, currentValue: Any, potentialValue: Any, json: AnyObject) {
+    override func load(propertyWithName name: String, currentValue: Any, potentialValue: Any, json: AnyObject) {
       guard !(potentialValue is NSNull) else { return }
       switch name {
       case "c": c = Int(potentialValue as! NSNumber)
       case "d": d = Int(potentialValue as! NSNumber)
       case "struct1":
-        struct1 = Struct1()
+        struct1 = Class1()
         _ = try! struct1!.load(jsonObject: potentialValue as AnyObject)
       default: break
       }
@@ -436,7 +454,7 @@ extension SwiftCollectionPersistenceTests {
   
   func testJsonObjects() {
     // get object to test
-    let obj = Class1(defaults: true)
+    let obj = Class2(defaults: true)
     
     // get JSON object
     guard let json = obj.jsonObject() else { XCTAssert(false); return }
@@ -454,12 +472,12 @@ extension SwiftCollectionPersistenceTests {
     XCTAssertEqual(dict["c"] as! Int, 3)
     XCTAssertNil(dict["d"])
     
-    // check serialized Struct1
+    // check serialized Class1
     let struct1 = dict["struct1"]
     XCTAssertNotNil(struct1)
     XCTAssertTrue(struct1 is NSDictionary)
     
-    // verify contents of Struct1
+    // verify contents of Class1
     let dict1 = struct1 as! [String: Int]
     XCTAssertEqual(dict1["a"], 1)
     XCTAssertNil(dict1["b"])
@@ -467,7 +485,7 @@ extension SwiftCollectionPersistenceTests {
   
   func testJsonObjectsSaveAndLoad() {
     // get object to test
-    let obj = Class1(defaults: true)
+    let obj = Class2(defaults: true)
     
     // create expectations
     let se = expectation(description: "Save Failed.")
@@ -476,7 +494,7 @@ extension SwiftCollectionPersistenceTests {
     // load object
     let load = {
       do {
-        var loaded = Class1()
+        let loaded = Class2()
         try loaded.load(jsonStorage: .userDefaults, completion: { (success, value) in
           le.fulfill()
           XCTAssertTrue(success)
@@ -498,6 +516,66 @@ extension SwiftCollectionPersistenceTests {
         XCTAssertTrue(success)
         if (success) {
           load()
+        }
+      }
+    } catch {
+      XCTFail()
+    }
+    
+    // wait for save and load
+    waitForExpectations(timeout: 60) { (error) in
+      if let error = error {
+        XCTFail("Save Failed: \(error.localizedDescription)")
+      }
+    }
+    
+  }
+  
+  func testJsonObjectsSaveAndRemove() {
+    // get object to test
+    let obj = Class2(defaults: true)
+    
+    // create expectations
+    let se = expectation(description: "Save Failed.")
+    let re = self.expectation(description: "Remove Failed.")
+    let le = self.expectation(description: "Load Failed.")
+    
+    // load object
+    let load = {
+      do {
+        let loaded = Class2()
+        try loaded.load(jsonStorage: .userDefaults, completion: { (success, value) in
+          le.fulfill()
+          XCTAssertFalse(success)
+          XCTAssertNil(value)
+        })
+      } catch {
+        XCTFail()
+      }
+    }
+    
+    // remove object
+    let remove = {
+      do {
+        try obj.remove(jsonStorage: .userDefaults, completion: { (success) in
+          re.fulfill()
+          XCTAssertTrue(success)
+          if (success) {
+            load()
+          }
+        })
+      } catch {
+        XCTFail()
+      }
+    }
+    
+    // save object
+    do {
+      try obj.save(jsonStorage: .userDefaults) { (success) in
+        se.fulfill()
+        XCTAssertTrue(success)
+        if (success) {
+          remove()
         }
       }
     } catch {
@@ -539,7 +617,7 @@ fileprivate struct SimpleCollectionIndex<Element: Hashable>: Comparable {
   
 }
 
-fileprivate class SimpleCollection<Element: Hashable>: Collection {
+fileprivate class SimpleCollection<Element: Hashable>: SCJsonObject, Collection {
   
   public typealias Iterator = AnyIterator<Element>
   typealias Index = SimpleCollectionIndex<Element>
@@ -547,6 +625,11 @@ fileprivate class SimpleCollection<Element: Hashable>: Collection {
   var elements: [Element] = []
   
   required init() {
+    super.init()
+  }
+  
+  required init(json: AnyObject) throws {
+    try super.init(json: json)
   }
   
   func add(element: Element) {
@@ -574,10 +657,6 @@ fileprivate class SimpleCollection<Element: Hashable>: Collection {
     return elements[position.index]
   }
 
-}
-
-extension SimpleCollection: SCJsonProtocol {
-  
 }
 
 fileprivate class PersistenceCollection<Element: NSString>: SimpleCollection<Element>, SCJsonCollectionProtocol {

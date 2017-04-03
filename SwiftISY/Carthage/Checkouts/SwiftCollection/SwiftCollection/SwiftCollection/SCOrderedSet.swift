@@ -18,13 +18,12 @@
 
 import Foundation
 
-/// `SCOrderedSet` holds document objects conforming to `SCDocumentProtocol`.
-///
-/// Documents added to this collection include a primary key.
+/// `SCOrderedSet` holds `SCDocument` objects.  Documents added to this collection must include a
+/// primary key.
 ///
 /// The collection automatically arranges elements by the sort keys.
 ///
-open class SCOrderedSet<Element: SCDocumentProtocol> {
+open class SCOrderedSet<Element: SCDocument>: SCJsonObject {
 
   // Holds an array of elements.
   fileprivate var elements: [Element] = []
@@ -38,14 +37,19 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
 
   /// Creates an instance of `SCOrderedSet`.
   public required init() {
-    // nothing to do
+    super.init()
   }
   
+  public required init(json: AnyObject) throws {
+    try super.init(json: json)
+  }
+
   /// Creates an instance of `SCOrderedSet` populated by documents in the collection.
   ///
   /// - Parameter collection: Documents to be added.
   /// - Throws: `missingId` if a document has no id.
-  public init<C: Collection>(_ collection: C) throws where C.Iterator.Element == Element {
+  public convenience init<C: Collection>(_ collection: C) throws where C.Iterator.Element == Element {
+    self.init()
     for element in collection {
       try append(document: element)
     }
@@ -55,10 +59,21 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   ///
   /// - Parameter array: Documents to be added.
   /// - Throws: `missingId` if a document has no id.
-  public init<S: Sequence>(_ sequence: S) throws where S.Iterator.Element == Element {
+  public convenience init<S: Sequence>(_ sequence: S) throws where S.Iterator.Element == Element {
+    self.init()
     for element in sequence {
       try append(document: element)
     }
+  }
+  
+  /*
+   * -----------------------------------------------------------------------------------------------
+   * MARK: - CustomStringConvertible
+   * -----------------------------------------------------------------------------------------------
+   */
+  
+  override open var description: String {
+    return String(describing: ids)
   }
 
   /*
@@ -76,7 +91,7 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   /// - Parameter id: Optional id to be applied to the document.
   /// - Returns: A document that can be added to the collection.
   /// - Throws: `existingId` if a document has no id.  `generateId` if an id could not be generated.
-  public func createDocument(withId id: SwiftCollection.Id? = nil) throws -> Element {
+  open func create(withId id: SwiftCollection.Id? = nil) throws -> Element {
     let existing = createdIds.union(ids.set as! Set<SwiftCollection.Id>)
     var theId = id
     if theId != nil {
@@ -104,7 +119,7 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   }
   
   /// Returns the last document from the collection.
-  public var last: Iterator.Element? {
+  final public var last: Iterator.Element? {
     return elements.last
   }
 
@@ -118,19 +133,19 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   ///
   /// - Parameter id: `id` of document to return.
   /// - Returns: A document with the specified id.
-  public func document(withId id: SwiftCollection.Id?) -> Element? {
+  final public func document(withId id: SwiftCollection.Id?) -> Element? {
     guard let id = id else { return nil }
     let i = ids.index(of: id)
     return i == NSNotFound ? nil : elements[i]
   }
   
   /// Returns the first document id in the collection.
-  public var firstId: SwiftCollection.Id? {
+  final public var firstId: SwiftCollection.Id? {
     return ids.firstObject as? SwiftCollection.Id
   }
   
   /// Returns the last document id in the collection.
-  public var lastId: SwiftCollection.Id? {
+  final public var lastId: SwiftCollection.Id? {
     return ids.lastObject as? SwiftCollection.Id
   }
   
@@ -138,7 +153,7 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   ///
   /// - Parameter id: `id` of document to be located.
   /// - Returns: `true` if the document id exists; `false` otherwise.
-  public func contains(id: SwiftCollection.Id) -> Bool {
+  final public func contains(id: SwiftCollection.Id) -> Bool {
     return ids.index(of: id) != NSNotFound
   }
   
@@ -148,7 +163,7 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   ///   - id: `id` of document to be located.
   ///   - offset: Distance from the specified id.
   /// - Returns: `id` of the document.  Or `nil` if the offset is out of bounds.
-  public func id(id: SwiftCollection.Id?, offset: Int) -> SwiftCollection.Id? {
+  final public func id(id: SwiftCollection.Id?, offset: Int) -> SwiftCollection.Id? {
     guard let id = id else { return nil }
     let i = ids.index(of: id)
     if i == NSNotFound { return nil }
@@ -160,7 +175,7 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   ///
   /// - Parameter id: `id` of document to be located.
   /// - Returns: `id` of next document.  Or `nil` if this is the last document.
-  public func id(after id: SwiftCollection.Id?) -> SwiftCollection.Id? {
+  final public func id(after id: SwiftCollection.Id?) -> SwiftCollection.Id? {
     return self.id(id: id, offset: +1)
   }
 
@@ -168,7 +183,7 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   ///
   /// - Parameter id: `id` of document to be located.
   /// - Returns: `id` of previous document.  Or `nil` if this is the first document.
-  public func id(before id: SwiftCollection.Id?) -> SwiftCollection.Id? {
+  final public func id(before id: SwiftCollection.Id?) -> SwiftCollection.Id? {
     return self.id(id: id, offset: -1)
   }
 
@@ -184,7 +199,7 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   ///   - document: Document to be added.
   ///   - i: Position to insert the document.  `i` must be a valid index into the collection.
   /// - Throws: `missingId` if the document has no id.
-  func insert(document: Element, at i: Int) throws {
+  open func insert(document: Element, at i: Int) throws {
     // ensure the document has an id
     guard document.hasId() else { throw SwiftCollection.Errors.missingId }
     guard !ids.contains(document.id) else { return }
@@ -199,7 +214,7 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   ///   - newDocuments: Documents to be added.
   ///   - i: Position to insert the documents.  `i` must be a valid index into the collection.
   /// - Throws: `missingId` if a document has no id.
-  func insert<C : Collection>(contentsOf newDocuments: C, at i: Int) throws where C.Iterator.Element == Element {
+  open func insert<C : Collection>(contentsOf newDocuments: C, at i: Int) throws where C.Iterator.Element == Element {
     let newTotal = ids.count + Int(newDocuments.count.toIntMax())
     elements.reserveCapacity(newTotal)
     for d in newDocuments.reversed() {
@@ -211,7 +226,7 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   ///
   /// - Parameter document: Document to be added.
   /// - Throws: `missingId` if the document has no id.
-  public func append(document: Element) throws {
+  open func append(document: Element) throws {
     // ensure the document has an id
     guard document.hasId() else { throw SwiftCollection.Errors.missingId }
     guard !ids.contains(document.id) else { return }
@@ -224,7 +239,7 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   ///
   /// - Parameter newDocuments: A collection of documents to be added.
   /// - Throws: `missingId` if a document has no id.
-  public func append<C : Collection>(contentsOf newDocuments: C) throws where C.Iterator.Element == Element {
+  open func append<C : Collection>(contentsOf newDocuments: C) throws where C.Iterator.Element == Element {
     let newTotal = ids.count + Int(newDocuments.count.toIntMax())
     elements.reserveCapacity(newTotal)
     for d in newDocuments {
@@ -242,7 +257,7 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   /// Removes the document from the collection.
   ///
   /// - Parameter document: Document to be removed.
-  public func remove(document: Element) {
+  open func remove(document: Element) {
     if let i = index(of: document) {
       elements.remove(at: i.index)
       ids.remove(at: i.index)
@@ -254,7 +269,7 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   ///
   /// - Parameter newDocuments: A collection of documents to be removed.
   /// - Throws: `missingId` if a document has no id.
-  public func remove<C : Collection>(contentsOf newDocuments: C) where C.Iterator.Element == Element {
+  open func remove<C : Collection>(contentsOf newDocuments: C) where C.Iterator.Element == Element {
     for d in newDocuments {
       if let i = index(of: d) {
         elements.remove(at: i.index)
@@ -265,7 +280,7 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   }
 
   /// Removes all documents from the collection.
-  public func removeAll() {
+  open func removeAll() {
     elements.removeAll()
     ids.removeAllObjects()
     createdIds.removeAll()
@@ -282,7 +297,7 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   /// - Parameter other: Other set to combine.
   /// - Returns: A new set with unique elements from both sets.
   /// - Throws: `missingId` if the document has no id.
-  public func union(_ other: SCOrderedSet<Element>) throws -> SCOrderedSet<Element> {
+  open func union(_ other: SCOrderedSet<Element>) throws -> SCOrderedSet<Element> {
     let set = self
     for (_, element) in other.enumerated() {
       if !set.contains(element) { try set.append(document: element) }
@@ -293,7 +308,7 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   /// Removes any element in this set that is not present in the other set.
   ///
   /// - Parameter other: Other set to perform the intersection.
-  public func intersect(_ other: SCOrderedSet<Element>) {
+  open func intersect(_ other: SCOrderedSet<Element>) {
     var i = 0
     while i < elements.count {
       let element = elements[i]
@@ -309,7 +324,7 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
   /// Removes any element in this set that is present in the other set.
   ///
   /// - Parameter other: Other set to perform the subtraction.
-  public func minus(_ other: SCOrderedSet<Element>) {
+  open func minus(_ other: SCOrderedSet<Element>) {
     var i = 0
     while i < elements.count {
       let element = elements[i]
@@ -322,14 +337,6 @@ open class SCOrderedSet<Element: SCDocumentProtocol> {
     }
   }
 
-}
-
-extension SCOrderedSet: CustomStringConvertible {
-  
-  public var description: String {
-    return String(describing: ids)
-  }
-  
 }
 
 /*
@@ -376,23 +383,23 @@ extension SCOrderedSet: BidirectionalCollection {
 
   public typealias Index = SCOrderedSetIndex<Element>
   
-  public var startIndex: Index {
+  final public var startIndex: Index {
     return SCOrderedSetIndex(elements.startIndex)
   }
   
-  public var endIndex: Index {
+  final public var endIndex: Index {
     return SCOrderedSetIndex(elements.endIndex)
   }
   
-  public func index(after i: Index) -> Index {
+  final public func index(after i: Index) -> Index {
     return Index(elements.index(after: i.index))
   }
 
-  public func index(before i: Index) -> Index {
+  final public func index(before i: Index) -> Index {
     return Index(elements.index(before: i.index))
   }
 
-  public subscript (position: Index) -> Iterator.Element {
+  final public subscript (position: Index) -> Iterator.Element {
     return elements[position.index]
   }
   
@@ -406,7 +413,7 @@ extension SCOrderedSet: BidirectionalCollection {
 
 extension SCOrderedSet: SCJsonCollectionProtocol {
   
-  public func jsonCollectionElements() -> [Any] {
+  open func jsonCollectionElements() -> [Any] {
     return elements
   }
 

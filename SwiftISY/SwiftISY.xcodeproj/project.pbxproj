@@ -7,13 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		998139511E9016BB00D0D72E /* SwiftCollection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99E4D3FC1E8378850054040C /* SwiftCollection.framework */; };
+		998139591E94081B00D0D72E /* SwiftISYTests.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 998139581E94081B00D0D72E /* SwiftISYTests.bundle */; };
+		9981395B1E94087100D0D72E /* XCTestCase+SwiftISY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9981395A1E94087100D0D72E /* XCTestCase+SwiftISY.swift */; };
 		99863A851E4D6C0D001DAB3B /* SwiftISY.h in Headers */ = {isa = PBXBuildFile; fileRef = 99863A831E4D6C0D001DAB3B /* SwiftISY.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		99863AC41E4ECB27001DAB3B /* SwiftISY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC31E4ECB27001DAB3B /* SwiftISY.swift */; };
 		99863AC61E4ECF15001DAB3B /* SwiftISYRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC51E4ECF15001DAB3B /* SwiftISYRequest.swift */; };
 		99863AC91E4ECF38001DAB3B /* SwiftISYParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC71E4ECF38001DAB3B /* SwiftISYParser.swift */; };
 		99863ACA1E4ECF38001DAB3B /* SwiftISYObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC81E4ECF38001DAB3B /* SwiftISYObject.swift */; };
 		998C434D1E882CE7004B8EC1 /* SwiftISYRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 998C434C1E882CE7004B8EC1 /* SwiftISYRequestTests.swift */; };
-		998C435F1E885F38004B8EC1 /* SwiftISYRequestTests.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 998C434E1E882F12004B8EC1 /* SwiftISYRequestTests.bundle */; };
 		998C43611E889ABE004B8EC1 /* URLSession+Stub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 998C43601E889ABE004B8EC1 /* URLSession+Stub.swift */; };
 		99E4D3FD1E8378850054040C /* SwiftCollection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99E4D3FC1E8378850054040C /* SwiftCollection.framework */; };
 		99F855061E5CDE3800AB3D71 /* SwiftISYHostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F855051E5CDE3800AB3D71 /* SwiftISYHostTests.swift */; };
@@ -31,6 +33,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		998139581E94081B00D0D72E /* SwiftISYTests.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = SwiftISYTests.bundle; sourceTree = "<group>"; };
+		9981395A1E94087100D0D72E /* XCTestCase+SwiftISY.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "XCTestCase+SwiftISY.swift"; sourceTree = "<group>"; };
 		99863A801E4D6C0D001DAB3B /* SwiftISY.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftISY.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		99863A831E4D6C0D001DAB3B /* SwiftISY.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftISY.h; sourceTree = "<group>"; };
 		99863A841E4D6C0D001DAB3B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = SwiftISY/Info.plist; sourceTree = "<group>"; };
@@ -41,7 +45,6 @@
 		99863AC71E4ECF38001DAB3B /* SwiftISYParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYParser.swift; sourceTree = "<group>"; };
 		99863AC81E4ECF38001DAB3B /* SwiftISYObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYObject.swift; sourceTree = "<group>"; };
 		998C434C1E882CE7004B8EC1 /* SwiftISYRequestTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYRequestTests.swift; sourceTree = "<group>"; };
-		998C434E1E882F12004B8EC1 /* SwiftISYRequestTests.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = SwiftISYRequestTests.bundle; sourceTree = "<group>"; };
 		998C43601E889ABE004B8EC1 /* URLSession+Stub.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "URLSession+Stub.swift"; sourceTree = "<group>"; };
 		99E4D3F91E83773F0054040C /* Cartfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Cartfile; sourceTree = "<group>"; };
 		99E4D3FC1E8378850054040C /* SwiftCollection.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftCollection.framework; path = Carthage/Build/iOS/SwiftCollection.framework; sourceTree = "<group>"; };
@@ -62,6 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				998139511E9016BB00D0D72E /* SwiftCollection.framework in Frameworks */,
 				99F855081E5CDE3800AB3D71 /* SwiftISY.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -124,8 +128,9 @@
 			isa = PBXGroup;
 			children = (
 				998C43601E889ABE004B8EC1 /* URLSession+Stub.swift */,
+				9981395A1E94087100D0D72E /* XCTestCase+SwiftISY.swift */,
+				998139581E94081B00D0D72E /* SwiftISYTests.bundle */,
 				99F855051E5CDE3800AB3D71 /* SwiftISYHostTests.swift */,
-				998C434E1E882F12004B8EC1 /* SwiftISYRequestTests.bundle */,
 				998C434C1E882CE7004B8EC1 /* SwiftISYRequestTests.swift */,
 			);
 			path = SwiftISYTests;
@@ -233,7 +238,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				998C435F1E885F38004B8EC1 /* SwiftISYRequestTests.bundle in Resources */,
+				998139591E94081B00D0D72E /* SwiftISYTests.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -274,6 +279,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				99F855061E5CDE3800AB3D71 /* SwiftISYHostTests.swift in Sources */,
+				9981395B1E94087100D0D72E /* XCTestCase+SwiftISY.swift in Sources */,
 				998C434D1E882CE7004B8EC1 /* SwiftISYRequestTests.swift in Sources */,
 				998C43611E889ABE004B8EC1 /* URLSession+Stub.swift in Sources */,
 			);
@@ -438,9 +444,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = SwiftISY/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks $(PROJECT_DIR)/Carthage/Build/iOS";
 				PRODUCT_BUNDLE_IDENTIFIER = com.wyz.SwiftISYTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
@@ -451,9 +461,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = SwiftISY/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks $(PROJECT_DIR)/Carthage/Build/iOS";
 				PRODUCT_BUNDLE_IDENTIFIER = com.wyz.SwiftISYTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;

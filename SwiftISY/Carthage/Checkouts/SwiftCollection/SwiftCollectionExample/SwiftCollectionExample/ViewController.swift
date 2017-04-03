@@ -52,13 +52,13 @@ extension Document.Keys {
 ///
 /// A new persistent storage key is provided.  And loading from persistent storage is performed
 /// for documents in the collection.
-class OrderedSet: SCOrderedSet<Document>, SCJsonProtocol {
+class OrderedSet: SCOrderedSet<Document> {
   
-  func jsonKey() -> String {
+  override func storageKey() -> String {
     return "OrderedSetExample"
   }
   
-  public func load(jsonObject json: AnyObject) throws -> AnyObject? {
+  override func load(jsonObject json: AnyObject) throws -> AnyObject? {
     if let array = json as? [AnyObject] {
       for item in array {
         try? append(document: Document(json: item))
@@ -99,7 +99,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
   func saveAndLoad() {
     try? orderedSet.save(jsonStorage: .userDefaults) { (success) in
       print("saved", success)
-      var anotherOrderedSet = OrderedSet()
+      let anotherOrderedSet = OrderedSet()
       try? anotherOrderedSet.load(jsonStorage: .userDefaults) { (success, json) in
         print("loaded", success)
       }

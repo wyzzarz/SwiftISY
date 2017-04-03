@@ -71,7 +71,7 @@ public struct SwiftCollection {
     case invalidJson
     
     /// Missing key for JSON serialized object.
-    case missingJsonKey
+    case missingstorageKey
     
   }
 

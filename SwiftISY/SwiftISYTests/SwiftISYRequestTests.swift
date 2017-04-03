@@ -49,35 +49,24 @@ class SwiftISYRequestTests: XCTestCase {
     super.setUp()
     
     SwizzledURLSessionDataTask.taskHandler = { (request) -> (Data?, URLResponse?, Error?) in
-      // get bundle for tests target
-      let bundle = Bundle(for: type(of: self))
-      // get url for test data bundle
-      guard let testBundleUrl = bundle.url(forResource: "SwiftISYRequestTests", withExtension: "bundle") else { return (nil, nil, RequestError("Missing test data bundle.")) }
-      // get bundle for test data
-      guard let testBundle = Bundle(url: testBundleUrl) else { return (nil, nil, RequestError("Unable to load test data bundle.")) }
-
-      var dataUrl: URL?
+      var data: Data?
       var response: URLResponse?
       var error: Error?
       
-      // process request
+      // get xml data from request
       let url = request.url
       if let path = url?.path {
         switch path {
         case Paths.nodes:
-          dataUrl = testBundle.url(forResource: "Nodes", withExtension: "xml")
+          data = self.testResourceData(forResource: "Nodes", withExtension: "xml")
         case Paths.statuses:
-          dataUrl = testBundle.url(forResource: "Statuses", withExtension: "xml")
+          data = self.testResourceData(forResource: "Statuses", withExtension: "xml")
         case Paths.response:
-          dataUrl = testBundle.url(forResource: "Response", withExtension: "xml")
+          data = self.testResourceData(forResource: "Response", withExtension: "xml")
         default:
           break
         }
       }
-
-      // get data from test bundle
-      var data: Data?
-      if let url = dataUrl { data = try? Data(contentsOf: url) }
       
       // prepare response from data
       if let data = data {

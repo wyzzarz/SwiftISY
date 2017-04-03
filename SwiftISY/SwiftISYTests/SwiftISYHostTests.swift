@@ -19,92 +19,163 @@
 import XCTest
 import SwiftISY
 
-/*
 class SwiftISYHostTests: XCTestCase {
-
-  struct Constants {
-    static let id1 = "id1-value"
-    static let host1 = "host1-value"
-    static let user1 = "user1-value"
-    static let password1 = "password1-value"
-    static let id2 = "id2-value"
-    static let host2 = "host2-value"
-    static let user2 = "user2-value"
-    static let password2 = "password2-value"
-    static let id3 = "id3-value"
-    static let host3 = "host3-value"
-    static let user3 = "user3-value"
-    static let password3 = "password3-value"
-  }
+  
+  let host1 = (id: UInt(1), host: "host1-value", user: "user1-value", password: "password1-value")
+  let host2 = (id: UInt(2), host: "host2-value", user: "user2-value", password: "password2-value")
+  let host3 = (id: UInt(3), host: "host3-value", user: "user3-value", password: "password3-value")
+  
+  var hosts = SwiftISYHosts()
   
   override func setUp() {
     super.setUp()
     
     // remove existing hosts
-    let ud = UserDefaults.standard
-    ud.removeObject(forKey: "hosts")
+    try? hosts.remove(jsonStorage: .userDefaults, completion: nil)
   }
   
   override func tearDown() {
     // remove existing hosts
-    let ud = UserDefaults.standard
-    ud.removeObject(forKey: "hosts")
-
+    try? hosts.remove(jsonStorage: .userDefaults, completion: nil)
+    
     super.tearDown()
   }
   
   func testNoHosts() {
-    let hosts = SwiftISYHost.get(persistentStorage: .userDefaults)
+    try? hosts.load(jsonStorage: .userDefaults, completion: nil)
     XCTAssertEqual(hosts.count, 0)
   }
-
+  
   func testCreateHost() {
-    let host1 = SwiftISYHost(id: Constants.id1, host: Constants.host1, user: Constants.user1, password: Constants.password1)
-    XCTAssertEqual(host1.id, Constants.id1)
-    XCTAssertEqual(host1.host, Constants.host1)
-    XCTAssertEqual(host1.user, Constants.user1)
-    XCTAssertEqual(host1.password, Constants.password1)
+    let hostA = SwiftISYHost(host: host1.host, user: host1.user, password: host1.password)
+    XCTAssertEqual(hostA.id, 0)
+    XCTAssertEqual(hostA.host, host1.host)
+    XCTAssertEqual(hostA.user, host1.user)
+    XCTAssertEqual(hostA.password, host1.password)
+    
+    let hostB = SwiftISYHost(id: host2.id, host: host2.host, user: host2.user, password: host2.password)
+    XCTAssertEqual(hostB.id, host2.id)
+    XCTAssertEqual(hostB.host, host2.host)
+    XCTAssertEqual(hostB.user, host2.user)
+    XCTAssertEqual(hostB.password, host2.password)
+  }
+  
+  func testProvidePassword() {
+    let host = SwiftISYHost()
+    
+    // Provide a password
+    SwiftISYHost.providePassword { (host) -> String in
+      return "TEST"
+    }
+    XCTAssertEqual(host.password, "TEST")
+    
+    // Clear password provider
+    SwiftISYHost.providePassword(nil)
+    XCTAssertEqual(host.password, "")
   }
   
   func testAddHost() {
-    let host1 = SwiftISYHost(id: Constants.id1, host: Constants.host1, user: Constants.user1, password: Constants.password1)
-    SwiftISYHost.add(persistentStorage: .userDefaults, hosts: [host1])
-    let hosts = SwiftISYHost.get(persistentStorage: .userDefaults)
+    // create a host
+    guard let hostA = try? hosts.create() else { XCTFail(); return }
+    XCTAssertNotNil(hostA)
+    XCTAssertGreaterThan(hostA.id, 0)
+    hostA.host = host1.host
+    hostA.user = host1.user
+    
+    // add host
+    try? hosts.append(document: hostA)
     XCTAssertEqual(hosts.count, 1)
-    let anotherHost1 = hosts[0]
-    XCTAssertEqual(anotherHost1.id, Constants.id1)
-    XCTAssertEqual(anotherHost1.host, Constants.host1)
-    XCTAssertEqual(anotherHost1.user, Constants.user1)
-    XCTAssertEqual(anotherHost1.password, "")
+    
+    // save host
+    try? hosts.save(jsonStorage: .userDefaults, completion: nil)
+    let jsonObject = hosts.jsonObject() as? [[String: Any]]
+    XCTAssertNotNil(jsonObject)
+    
+    // load hosts
+    let hostsB = SwiftISYHosts()
+    XCTAssertNoThrow(try hostsB.load(jsonStorage: .userDefaults, completion: nil))
+    XCTAssertEqual(hostsB.count, 1)
+    
+    // validate saved host
+    let hostB = hostsB.first
+    XCTAssertEqual(hostB?.host, host1.host)
+    XCTAssertEqual(hostB?.user, host1.user)
+    XCTAssertNotEqual(hostB?.password, host1.password)
+    XCTAssertEqual(hostB?.password, "")
   }
-
+  
   func testAddHosts() {
-    let host1 = SwiftISYHost(id: Constants.id1, host: Constants.host1, user: Constants.user1, password: Constants.password1)
-    let host2 = SwiftISYHost(id: Constants.id2, host: Constants.host2, user: Constants.user2, password: Constants.password2)
-    SwiftISYHost.add(persistentStorage: .userDefaults, hosts: [host1, host2])
-    let hosts = SwiftISYHost.get(persistentStorage: .userDefaults)
-    XCTAssertEqual(hosts.count, 2)
-    let anotherHost1 = hosts[0]
-    XCTAssertEqual(anotherHost1.id, Constants.id1)
-    let anotherHost2 = hosts[1]
-    XCTAssertEqual(anotherHost2.id, Constants.id2)
+    // add to hosts
+    let hostA = SwiftISYHost(id: host1.id, host: host1.host, user: host1.user, password: host1.password)
+    let hostB = SwiftISYHost(id: host2.id, host: host2.host, user: host2.user, password: host2.password)
+    try? hosts.append(contentsOf: [hostA, hostB])
+    
+    // save hosts
+    try? hosts.save(jsonStorage: .userDefaults, completion: nil)
+    let jsonObject = hosts.jsonObject() as? [[String: Any]]
+    XCTAssertNotNil(jsonObject)
+    
+    // load hosts
+    let anotherHosts = SwiftISYHosts()
+    XCTAssertNoThrow(try anotherHosts.load(jsonStorage: .userDefaults, completion: nil))
+    XCTAssertEqual(anotherHosts.count, 2)
+    
+    // validate saved hosts
+    XCTAssertEqual(anotherHosts.first, hostA)
+    XCTAssertEqual(anotherHosts.last, hostB)
   }
-
+  
   func testAddHostsAgain() {
-    let host1 = SwiftISYHost(id: Constants.id1, host: Constants.host1, user: Constants.user1, password: Constants.password1)
-    let host2 = SwiftISYHost(id: Constants.id2, host: Constants.host2, user: Constants.user2, password: Constants.password2)
-    let host3 = SwiftISYHost(id: Constants.id3, host: Constants.host3, user: Constants.user3, password: Constants.password3)
-    SwiftISYHost.add(persistentStorage: .userDefaults, hosts: [host1, host2])
-    SwiftISYHost.add(persistentStorage: .userDefaults, hosts: [host2, host3])
-    let hosts = SwiftISYHost.get(persistentStorage: .userDefaults)
-    XCTAssertEqual(hosts.count, 3)
-    let anotherHost1 = hosts[0]
-    XCTAssertEqual(anotherHost1.id, Constants.id1)
-    let anotherHost2 = hosts[1]
-    XCTAssertEqual(anotherHost2.id, Constants.id2)
-    let anotherHost3 = hosts[2]
-    XCTAssertEqual(anotherHost3.id, Constants.id3)
+    // add to hosts
+    let hostA = SwiftISYHost(id: host1.id, host: host1.host, user: host1.user, password: host1.password)
+    let hostB = SwiftISYHost(id: host2.id, host: host2.host, user: host2.user, password: host2.password)
+    let hostC = SwiftISYHost(id: host3.id, host: host3.host, user: host3.user, password: host3.password)
+    try? hosts.append(contentsOf: [hostA, hostB])
+    try? hosts.append(contentsOf: [hostB, hostC])
+    
+    // save hosts
+    try? hosts.save(jsonStorage: .userDefaults, completion: nil)
+    let jsonObject = hosts.jsonObject() as? [[String: Any]]
+    XCTAssertNotNil(jsonObject)
+    
+    // load hosts
+    let anotherHosts = SwiftISYHosts()
+    XCTAssertNoThrow(try anotherHosts.load(jsonStorage: .userDefaults, completion: nil))
+    XCTAssertEqual(anotherHosts.count, 3)
+    
+    // validate saved hosts
+    XCTAssertEqual(anotherHosts.first, hostA)
+    XCTAssertEqual(anotherHosts[anotherHosts.index(after: anotherHosts.startIndex)], hostB)
+    XCTAssertEqual(anotherHosts.last, hostC)
   }
-
+  
+  func testLoadHosts() {
+    // get json from test bundle
+    guard let json =  testResourceJson(forResource: "LoadHosts", withExtension: "json") else { XCTFail("Failed to load LoadHosts.json."); return }
+    // load hosts from json
+    guard let hosts = try? SwiftISYHosts(json: json) else { XCTFail("Failed to load hosts from JSON."); return }
+    XCTAssertEqual(hosts.count, 3)
+    
+    let hostA = hosts.first
+    XCTAssertEqual(hostA?.id, host1.id)
+    XCTAssertEqual(hostA?.host, host1.host)
+    XCTAssertEqual(hostA?.user, host1.user)
+    XCTAssertEqual(hostA?.password, "")
+    XCTAssertEqual(hostA?.alternativeHost, "alternativeHost1-value")
+    XCTAssertEqual(hostA?.friendlyName, "friendlyName1-value")
+    
+    let hostB = hosts[hosts.index(after: hosts.startIndex)]
+    XCTAssertEqual(hostB.id, host2.id)
+    XCTAssertEqual(hostB.host, host2.host)
+    XCTAssertEqual(hostB.user, host2.user)
+    XCTAssertEqual(hostB.password, "")
+    
+    let hostC = hosts.last
+    XCTAssertEqual(hostC?.id, host3.id)
+    XCTAssertEqual(hostC?.host, host3.host)
+    XCTAssertEqual(hostC?.user, host3.user)
+    XCTAssertEqual(hostC?.password, "")
+    
+  }
+  
 }
-*/

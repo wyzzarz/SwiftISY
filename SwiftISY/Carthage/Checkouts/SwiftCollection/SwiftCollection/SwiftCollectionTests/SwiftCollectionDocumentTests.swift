@@ -58,7 +58,7 @@ class SwiftCollectionDocumentTests: XCTestCase {
     let doc = SCDocument(id: 0x10000)
     
     let load = {
-      var loaded = SCDocument()
+      let loaded = SCDocument()
       try! loaded.load(jsonStorage: .userDefaults, completion: { (success, json) in
         le.fulfill()
         XCTAssertEqual(doc.id, loaded.id)
