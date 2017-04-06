@@ -51,7 +51,7 @@ open class SCOrderedSet<Element: SCDocument>: SCJsonObject {
   public convenience init<C: Collection>(_ collection: C) throws where C.Iterator.Element == Element {
     self.init()
     for element in collection {
-      try append(document: element)
+      try append(element)
     }
   }
 
@@ -62,7 +62,7 @@ open class SCOrderedSet<Element: SCDocument>: SCJsonObject {
   public convenience init<S: Sequence>(_ sequence: S) throws where S.Iterator.Element == Element {
     self.init()
     for element in sequence {
-      try append(document: element)
+      try append(element)
     }
   }
   
@@ -90,32 +90,45 @@ open class SCOrderedSet<Element: SCDocument>: SCJsonObject {
   ///
   /// - Parameter id: Optional id to be applied to the document.
   /// - Returns: A document that can be added to the collection.
-  /// - Throws: `existingId` if a document has no id.  `generateId` if an id could not be generated.
+  /// - Throws: `existingId` the `id` already exists in the collection.  `generateId` if an id could 
+  ///           not be generated.
   open func create(withId id: SwiftCollection.Id? = nil) throws -> Element {
-    let existing = createdIds.union(ids.set as! Set<SwiftCollection.Id>)
-    var theId = id
-    if theId != nil {
-      // check if this id already exists
-      if existing.contains(theId!) { throw SwiftCollection.Errors.existingId }
-    } else {
-      // get a new id
-      var i: Int = Int.max / 10
-      repeat {
-        let r = SwiftCollection.Id.random()
-        if !existing.contains(r) {
-          theId = r
-          break
-        }
-        i -= 1
-      } while i > 0
-    }
-    guard theId != nil else { throw SwiftCollection.Errors.generateId }
+    // get an id
+    let anId = try generateId(hint: id)
     
-    // remember this id until the document is stored in this collection
-    self.createdIds.insert(theId!)
+    // verify supplied id can be used
+    if let id = id {
+      if anId != id { throw SwiftCollection.Errors.existingId }
+    }
     
     // done
-    return Element(id: theId!)
+    return Element(id: anId)
+  }
+  
+  /// Adds an id to this document.  The id will be randomly generated and unique for documents in 
+  /// the collection.
+  ///
+  /// The document will not be added to the collection.  It can be added later once the details
+  /// have been updated.
+  ///
+  /// - Parameters:
+  ///   - element: Document to register.
+  ///   - hint: Id to be used as a hint.  If it isn't used in the collection, then the element will
+  ///     be updated with this id.  Otherwise a new id will be generated.
+  /// - Returns: A document that can be added to the collection.
+  /// - Throws: `existingId` if a document has no id.  `generateId` if an id could not be generated.
+  open func register(_ element: Element, hint id: SwiftCollection.Id? = nil) throws {
+    // exit if this element already has an id
+    if element.hasId() && !(createdIds.contains(element.id) || ids.contains(element.id)) {
+      createdIds.insert(element.id)
+      return
+    }
+
+    // get an id
+    let id = try generateId(hint: id)
+    
+    // store this id
+    element.setId(id)
   }
   
   /// Returns the last document from the collection.
@@ -128,6 +141,39 @@ open class SCOrderedSet<Element: SCDocument>: SCJsonObject {
    * MARK: - Document Id
    * -----------------------------------------------------------------------------------------------
    */
+  
+  fileprivate func generateId(hint id: SwiftCollection.Id? = nil) throws -> SwiftCollection.Id {
+    // get existing ids
+    let existing = createdIds.union(ids.set as! Set<SwiftCollection.Id>)
+    
+    // check if this id can be used
+    if let id = id {
+      if !existing.contains(id) {
+        // remember this id until the document is stored in this collection
+        createdIds.insert(id)
+        // done
+        return id
+      }
+    }
+
+    // otherwise randomly pick an id
+    // limit attempts to generate id
+    // TODO: scan for an id if random attempts fail
+    var i: Int = Int.max / 10
+    repeat {
+      let r = SwiftCollection.Id.random()
+      if !existing.contains(r) {
+        // remember this id until the document is stored in this collection
+        createdIds.insert(r)
+        // done
+        return r
+      }
+      i -= 1
+    } while i > 0
+    
+    // failed
+    throw SwiftCollection.Errors.generateId
+  }
   
   /// Returns a document from the collection.
   ///
@@ -199,7 +245,7 @@ open class SCOrderedSet<Element: SCDocument>: SCJsonObject {
   ///   - document: Document to be added.
   ///   - i: Position to insert the document.  `i` must be a valid index into the collection.
   /// - Throws: `missingId` if the document has no id.
-  open func insert(document: Element, at i: Int) throws {
+  open func insert(_ document: Element, at i: Int) throws {
     // ensure the document has an id
     guard document.hasId() else { throw SwiftCollection.Errors.missingId }
     guard !ids.contains(document.id) else { return }
@@ -218,7 +264,7 @@ open class SCOrderedSet<Element: SCDocument>: SCJsonObject {
     let newTotal = ids.count + Int(newDocuments.count.toIntMax())
     elements.reserveCapacity(newTotal)
     for d in newDocuments.reversed() {
-      try self.insert(document: d, at: i)
+      try self.insert(d, at: i)
     }
   }
   
@@ -226,7 +272,7 @@ open class SCOrderedSet<Element: SCDocument>: SCJsonObject {
   ///
   /// - Parameter document: Document to be added.
   /// - Throws: `missingId` if the document has no id.
-  open func append(document: Element) throws {
+  open func append(_ document: Element) throws {
     // ensure the document has an id
     guard document.hasId() else { throw SwiftCollection.Errors.missingId }
     guard !ids.contains(document.id) else { return }
@@ -244,7 +290,7 @@ open class SCOrderedSet<Element: SCDocument>: SCJsonObject {
     elements.reserveCapacity(newTotal)
     for d in newDocuments {
       if ids.contains(d.id) { continue }
-      try self.append(document: d)
+      try self.append(d)
     }
   }
   
@@ -257,7 +303,7 @@ open class SCOrderedSet<Element: SCDocument>: SCJsonObject {
   /// Removes the document from the collection.
   ///
   /// - Parameter document: Document to be removed.
-  open func remove(document: Element) {
+  open func remove(_ document: Element) {
     if let i = index(of: document) {
       elements.remove(at: i.index)
       ids.remove(at: i.index)
@@ -300,7 +346,7 @@ open class SCOrderedSet<Element: SCDocument>: SCJsonObject {
   open func union(_ other: SCOrderedSet<Element>) throws -> SCOrderedSet<Element> {
     let set = self
     for (_, element) in other.enumerated() {
-      if !set.contains(element) { try set.append(document: element) }
+      if !set.contains(element) { try set.append(element) }
     }
     return set
   }

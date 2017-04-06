@@ -45,7 +45,7 @@ public class SwiftISYHosts: SCOrderedSet<SwiftISYHost> {
   override open func load(jsonObject json: AnyObject) throws -> AnyObject? {
     if let array = json as? [AnyObject] {
       for item in array {
-        try append(document: SwiftISYHost(json: item))
+        try append(SwiftISYHost(json: item))
       }
     }
     return json
@@ -140,8 +140,14 @@ public class SwiftISYHost: SCDocument {
   
   open override func load(propertyWithName name: String, currentValue: Any, potentialValue: Any, json: AnyObject) {
     super.load(propertyWithName: name, currentValue: currentValue, potentialValue: potentialValue, json: json)
+    
+    // get json as a dictionary
     guard let dict = json as? [String: Any] else { return }
+    
+    // get value for this property, ignore any non-String values
     guard let value = dict[name] as? String else { return }
+    
+    // apply value for property
     switch name {
     case Keys.friendlyName: friendlyName = value
     case Keys.host: host = value
@@ -169,6 +175,15 @@ extension SwiftISYHost.Keys {
 // -------------------------------------------------------------------------------------------------
 
 public class SwiftISYNodes: SCOrderedSet<SwiftISYNode> {
+
+  override open func load(jsonObject json: AnyObject) throws -> AnyObject? {
+    if let array = json as? [AnyObject] {
+      for item in array {
+        try append(SwiftISYNode(json: item))
+      }
+    }
+    return json
+  }
 
 }
 
@@ -232,6 +247,55 @@ public class SwiftISYNode: SCDocument, SwiftISYParserProtocol {
     }
   }
 
+  open override func load(propertyWithName name: String, currentValue: Any, potentialValue: Any, json: AnyObject) {
+    super.load(propertyWithName: name, currentValue: currentValue, potentialValue: potentialValue, json: json)
+    
+    // get json as a dictionary
+    guard let dict = json as? [String: Any] else { return }
+    
+    // get value for this property
+    guard let value = dict[name] else { return }
+
+    // apply value for property
+    switch name {
+    case Keys.flags:
+      if let flagsDict = value as? [String: NSNumber] {
+        flags = SwiftISY.NodeFlags(rawValue: flagsDict["rawValue"]?.uint8Value ?? 0)
+      }
+    case Keys.address: address = value as? String ?? ""
+    case Keys.name: self.name = value as? String ?? ""
+    case Keys.parent: parent = value as? String ?? ""
+    case Keys.family: family = (value as? NSNumber)?.uintValue ?? 0
+    case Keys.type: type = value as? String ?? ""
+    case Keys.enabled: enabled = value as? Bool ?? false
+    case Keys.deviceClass: deviceClass = (value as? NSNumber)?.uintValue ?? 0
+    case Keys.wattage: wattage = (value as? NSNumber)?.uintValue ?? 0
+    case Keys.dcPeriod: dcPeriod = (value as? NSNumber)?.uintValue ?? 0
+    case Keys.pnode: pnode = value as? String ?? ""
+    case Keys.elkId: elkId = value as? String ?? ""
+    case Keys.property: property = value as? String ?? ""
+    default: break
+    }
+  }
+
+}
+
+extension SwiftISYNode.Keys {
+  
+  public static let flags = "flags"
+  public static let address = "address"
+  public static let name = "name"
+  public static let parent = "parent"
+  public static let family = "family"
+  public static let type = "type"
+  public static let enabled = "enabled"
+  public static let deviceClass = "deviceClass"
+  public static let wattage = "wattage"
+  public static let dcPeriod = "dcPeriod"
+  public static let pnode = "pnode"
+  public static let elkId = "elkId"
+  public static let property = "property"
+  
 }
 
 // -------------------------------------------------------------------------------------------------

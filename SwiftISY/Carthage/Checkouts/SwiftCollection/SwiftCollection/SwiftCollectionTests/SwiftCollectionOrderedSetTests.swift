@@ -34,7 +34,7 @@ class SwiftCollectionOrderedSetTests: XCTestCase {
     override func load(jsonObject json: AnyObject) throws -> AnyObject? {
       if let array = json as? [AnyObject] {
         for item in array {
-          try? append(document: SCDocument(json: item))
+          try? append(SCDocument(json: item))
         }
       }
       return json
@@ -67,6 +67,36 @@ class SwiftCollectionOrderedSetTests: XCTestCase {
     XCTAssertThrowsError(try set1.create(withId: doc1.id))
     let doc2 = try! set1.create(withId: 2)
     XCTAssertEqual(doc2.id, 2)
+  }
+  
+  func testRegisterDocument() {
+    // register an empty document
+    let doc1 = SCDocument()
+    XCTAssertEqual(doc1.id, 0)
+    try? set1.register(doc1)
+    XCTAssertGreaterThan(doc1.id, 0)
+    
+    // register a document with an existing id
+    let doc2 = SCDocument(id: doc1.id > 1000 ? 1000 : 1001)
+    try? set1.register(doc2)
+    
+    // register a document with a hint for an existing id
+    let doc3 = SCDocument()
+    XCTAssertEqual(doc3.id, 0)
+    try? set1.register(doc3, hint: doc2.id)
+    XCTAssertNotEqual(doc3.id, doc2.id)
+  }
+  
+  func testRegisterNonExistingHint() {
+    // register an empty document
+    let doc1 = SCDocument()
+    try? set1.register(doc1)
+    
+    // register a document with a hint for a new id
+    let id2: SwiftCollection.Id = doc1.id > 1000 ? 1000 : 1001
+    let doc2 = SCDocument()
+    try? set1.register(doc2, hint: id2)
+    XCTAssertEqual(doc2.id, id2)
   }
   
   /*
@@ -130,19 +160,19 @@ class SwiftCollectionOrderedSetTests: XCTestCase {
    */
   
   func testEmptyDocument() {
-    XCTAssertThrowsError(try set1.append(document: docNone))
+    XCTAssertThrowsError(try set1.append(docNone))
   }
 
   func testAppendDocument() {
-    try! set1.append(document: docA)
-    try! set1.append(document: docB)
+    try! set1.append(docA)
+    try! set1.append(docB)
     XCTAssertEqual(set1.count, 2)
     XCTAssertEqual(set1.first, docA)
     XCTAssertEqual(set1.last, docB)
   }
 
   func testAppendDocuments() {
-    try! set1.append(document: docA)
+    try! set1.append(docA)
     try! set1.append(contentsOf: [docB, docC])
     XCTAssertEqual(set1.count, 3)
     XCTAssertEqual(set1.first, docA)
@@ -151,9 +181,9 @@ class SwiftCollectionOrderedSetTests: XCTestCase {
   }
   
   func testInsertDocument() {
-    try! set1.insert(document: docC, at: 0)
-    try! set1.insert(document: docB, at: 0)
-    try! set1.insert(document: docA, at: 0)
+    try! set1.insert(docC, at: 0)
+    try! set1.insert(docB, at: 0)
+    try! set1.insert(docA, at: 0)
     XCTAssertEqual(set1.count, 3)
     XCTAssertEqual(set1.first, docA)
     XCTAssertEqual(set1[set1.index(set1.startIndex, offsetBy: 1)], docB)
@@ -161,9 +191,9 @@ class SwiftCollectionOrderedSetTests: XCTestCase {
   }
   
   func testInsertDocuments() {
-    try! set1.insert(document: docC, at: 0)
-    try! set2.insert(document: docB, at: 0)
-    try! set2.insert(document: docA, at: 0)
+    try! set1.insert(docC, at: 0)
+    try! set2.insert(docB, at: 0)
+    try! set2.insert(docA, at: 0)
     try! set1.insert(contentsOf: set2, at: 0)
     XCTAssertEqual(set1.count, 3)
     XCTAssertEqual(set2.count, 2)
@@ -181,7 +211,7 @@ class SwiftCollectionOrderedSetTests: XCTestCase {
   func testRemoveDocument() {
     let set = try! SCOrderedSet<SCDocument>([docA, docB, docC])
     XCTAssertEqual(set.count, 3)
-    set.remove(document: docB)
+    set.remove(docB)
     XCTAssertEqual(set.count, 2)
   }
 

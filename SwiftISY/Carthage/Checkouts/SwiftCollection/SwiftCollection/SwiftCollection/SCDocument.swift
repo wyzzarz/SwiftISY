@@ -41,6 +41,9 @@ open class SCDocument: SCJsonObject {
   final public var id: SwiftCollection.Id {
     return _id
   }
+  final internal func setId(_ id: SwiftCollection.Id) {
+    _id = id
+  }
   fileprivate var _id: SwiftCollection.Id = 0
   
   /// Returns the primary key as a hex string in the format `0000-0000-0000-0000`.

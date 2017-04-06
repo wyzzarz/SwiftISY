@@ -83,7 +83,7 @@ class SwiftISYHostTests: XCTestCase {
     hostA.user = host1.user
     
     // add host
-    try? hosts.append(document: hostA)
+    try? hosts.append(hostA)
     XCTAssertEqual(hosts.count, 1)
     
     // save host
@@ -151,7 +151,7 @@ class SwiftISYHostTests: XCTestCase {
   
   func testLoadHosts() {
     // get json from test bundle
-    guard let json =  testResourceJson(forResource: "LoadHosts", withExtension: "json") else { XCTFail("Failed to load LoadHosts.json."); return }
+    guard let json =  testResourceJson(forResource: "Hosts", withExtension: "json") else { XCTFail("Failed to load Hosts.json."); return }
     // load hosts from json
     guard let hosts = try? SwiftISYHosts(json: json) else { XCTFail("Failed to load hosts from JSON."); return }
     XCTAssertEqual(hosts.count, 3)

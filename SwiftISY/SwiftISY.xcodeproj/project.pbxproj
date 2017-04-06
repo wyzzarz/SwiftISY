@@ -10,6 +10,7 @@
 		998139511E9016BB00D0D72E /* SwiftCollection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99E4D3FC1E8378850054040C /* SwiftCollection.framework */; };
 		998139591E94081B00D0D72E /* SwiftISYTests.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 998139581E94081B00D0D72E /* SwiftISYTests.bundle */; };
 		9981395B1E94087100D0D72E /* XCTestCase+SwiftISY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9981395A1E94087100D0D72E /* XCTestCase+SwiftISY.swift */; };
+		9981395D1E940D6F00D0D72E /* SwiftISYNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9981395C1E940D6F00D0D72E /* SwiftISYNodeTests.swift */; };
 		99863A851E4D6C0D001DAB3B /* SwiftISY.h in Headers */ = {isa = PBXBuildFile; fileRef = 99863A831E4D6C0D001DAB3B /* SwiftISY.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		99863AC41E4ECB27001DAB3B /* SwiftISY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC31E4ECB27001DAB3B /* SwiftISY.swift */; };
 		99863AC61E4ECF15001DAB3B /* SwiftISYRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC51E4ECF15001DAB3B /* SwiftISYRequest.swift */; };
@@ -35,6 +36,7 @@
 /* Begin PBXFileReference section */
 		998139581E94081B00D0D72E /* SwiftISYTests.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = SwiftISYTests.bundle; sourceTree = "<group>"; };
 		9981395A1E94087100D0D72E /* XCTestCase+SwiftISY.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "XCTestCase+SwiftISY.swift"; sourceTree = "<group>"; };
+		9981395C1E940D6F00D0D72E /* SwiftISYNodeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYNodeTests.swift; sourceTree = "<group>"; };
 		99863A801E4D6C0D001DAB3B /* SwiftISY.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftISY.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		99863A831E4D6C0D001DAB3B /* SwiftISY.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftISY.h; sourceTree = "<group>"; };
 		99863A841E4D6C0D001DAB3B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = SwiftISY/Info.plist; sourceTree = "<group>"; };
@@ -131,6 +133,7 @@
 				9981395A1E94087100D0D72E /* XCTestCase+SwiftISY.swift */,
 				998139581E94081B00D0D72E /* SwiftISYTests.bundle */,
 				99F855051E5CDE3800AB3D71 /* SwiftISYHostTests.swift */,
+				9981395C1E940D6F00D0D72E /* SwiftISYNodeTests.swift */,
 				998C434C1E882CE7004B8EC1 /* SwiftISYRequestTests.swift */,
 			);
 			path = SwiftISYTests;
@@ -280,6 +283,7 @@
 			files = (
 				99F855061E5CDE3800AB3D71 /* SwiftISYHostTests.swift in Sources */,
 				9981395B1E94087100D0D72E /* XCTestCase+SwiftISY.swift in Sources */,
+				9981395D1E940D6F00D0D72E /* SwiftISYNodeTests.swift in Sources */,
 				998C434D1E882CE7004B8EC1 /* SwiftISYRequestTests.swift in Sources */,
 				998C43611E889ABE004B8EC1 /* URLSession+Stub.swift in Sources */,
 			);

@@ -1,0 +1,74 @@
+[
+  {
+    "_id": 3752826601, 
+    "address": "24 DD AD 1", 
+    "dcPeriod": 3, 
+    "deviceClass": 1, 
+    "elkId": "C02", 
+    "enabled": true, 
+    "family": 0, 
+    "flags": {
+      "rawValue": 128
+    }, 
+    "name": "Light 1", 
+    "parent": "", 
+    "pnode": "24 DD AD 1", 
+    "property": "", 
+    "type": "1.32.65.0", 
+    "wattage": 2
+  }, 
+  {
+    "_id": 1525177531, 
+    "address": "24 EF 96 1", 
+    "dcPeriod": 14, 
+    "deviceClass": 13, 
+    "elkId": "B05", 
+    "enabled": true, 
+    "family": 11, 
+    "flags": {
+      "rawValue": 128
+    }, 
+    "name": "Light 2", 
+    "parent": "parent01", 
+    "pnode": "24 EF 96 1", 
+    "property": "property01", 
+    "type": "2.44.65.0", 
+    "wattage": 12
+  }, 
+  {
+    "_id": 6001991601, 
+    "address": "24 EF 96 3", 
+    "dcPeriod": 0, 
+    "deviceClass": 0, 
+    "elkId": "B06", 
+    "enabled": true, 
+    "family": 0, 
+    "flags": {
+      "rawValue": 0
+    }, 
+    "name": "Light 3", 
+    "parent": "", 
+    "pnode": "24 EF 96 1", 
+    "property": "", 
+    "type": "2.44.65.0", 
+    "wattage": 0
+  }, 
+  {
+    "_id": 6399823709, 
+    "address": "24 EF 96 4", 
+    "dcPeriod": 0, 
+    "deviceClass": 0, 
+    "elkId": "B07", 
+    "enabled": true, 
+    "family": 0, 
+    "flags": {
+      "rawValue": 0
+    }, 
+    "name": "Switch 1", 
+    "parent": "", 
+    "pnode": "24 EF 96 1", 
+    "property": "", 
+    "type": "2.44.65.0", 
+    "wattage": 0
+  }
+]
