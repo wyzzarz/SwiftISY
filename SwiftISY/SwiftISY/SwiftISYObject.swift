@@ -304,6 +304,15 @@ extension SwiftISYNode.Keys {
 
 public class SwiftISYGroups: SCOrderedSet<SwiftISYGroup> {
   
+  override open func load(jsonObject json: AnyObject) throws -> AnyObject? {
+    if let array = json as? [AnyObject] {
+      for item in array {
+        try append(SwiftISYGroup(json: item))
+      }
+    }
+    return json
+  }
+  
 }
 
 public class SwiftISYGroup: SCDocument, SwiftISYParserProtocol {
@@ -351,7 +360,52 @@ public class SwiftISYGroup: SCDocument, SwiftISYParserProtocol {
     default: break
     }
   }
+  
+  open override func load(propertyWithName name: String, currentValue: Any, potentialValue: Any, json: AnyObject) {
+    super.load(propertyWithName: name, currentValue: currentValue, potentialValue: potentialValue, json: json)
+    
+    // get json as a dictionary
+    guard let dict = json as? [String: Any] else { return }
+    
+    // get value for this property
+    guard let value = dict[name] else { return }
+    
+    // apply value for property
+    switch name {
+    case Keys.flags:
+      if let flagsDict = value as? [String: NSNumber] {
+        flags = SwiftISY.NodeFlags(rawValue: flagsDict["rawValue"]?.uint8Value ?? 0)
+      }
+    case Keys.address: address = value as? String ?? ""
+    case Keys.name: self.name = value as? String ?? ""
+    case Keys.family: family = (value as? NSNumber)?.uintValue ?? 0
+    case Keys.deviceGroup: deviceGroup = (value as? NSNumber)?.uintValue ?? 0
+    case Keys.elkId: elkId = value as? String ?? ""
+    case Keys.controllerIds:
+      if let array = value as? [String] {
+        controllerIds = array
+      }
+    case Keys.responderIds:
+      if let array = value as? [String] {
+        responderIds = array
+      }
+    default: break
+    }
+  }
 
+}
+
+extension SwiftISYGroup.Keys {
+  
+//  public static let flags = "flags"
+//  public static let address = "address"
+//  public static let name = "name"
+//  public static let family = "family"
+  public static let deviceGroup = "deviceGroup"
+//  public static let elkId = "elkId"
+  public static let responderIds = "responderIds"
+  public static let controllerIds = "controllerIds"
+  
 }
 
 // -------------------------------------------------------------------------------------------------
