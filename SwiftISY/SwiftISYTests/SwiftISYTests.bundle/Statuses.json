@@ -1,0 +1,26 @@
+[
+  {
+    "_id": 3115472222, 
+    "formatted": "Off", 
+    "unitOfMeasure": "on/off", 
+    "value": 0
+  }, 
+  {
+    "_id": 3097085496, 
+    "formatted": "Off", 
+    "unitOfMeasure": "on/off", 
+    "value": 0
+  }, 
+  {
+    "_id": 3611344313, 
+    "formatted": "On", 
+    "unitOfMeasure": "on/off", 
+    "value": 255
+  }, 
+  {
+    "_id": 4063923215, 
+    "formatted": "30", 
+    "unitOfMeasure": "%/on/off", 
+    "value": 75
+  }
+]

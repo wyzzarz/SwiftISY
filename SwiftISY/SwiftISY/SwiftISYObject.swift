@@ -413,6 +413,15 @@ extension SwiftISYGroup.Keys {
 // -------------------------------------------------------------------------------------------------
 
 public class SwiftISYStatuses: SCOrderedSet<SwiftISYStatus> {
+  
+  override open func load(jsonObject json: AnyObject) throws -> AnyObject? {
+    if let array = json as? [AnyObject] {
+      for item in array {
+        try append(SwiftISYStatus(json: item))
+      }
+    }
+    return json
+  }
 
 }
 
@@ -467,6 +476,32 @@ public class SwiftISYStatus: SCDocument, SwiftISYParserProtocol {
     default: break
     }
   }
+  
+  open override func load(propertyWithName name: String, currentValue: Any, potentialValue: Any, json: AnyObject) {
+    super.load(propertyWithName: name, currentValue: currentValue, potentialValue: potentialValue, json: json)
+    
+    // get json as a dictionary
+    guard let dict = json as? [String: Any] else { return }
+    
+    // get value for this property
+    guard let value = dict[name] else { return }
+    
+    // apply value for property
+    switch name {
+    case Keys.value: self.value = (value as? NSNumber)?.uint8Value ?? 0
+    case Keys.formatted: formatted = value as? String ?? ""
+    case Keys.unitOfMeasure: unitOfMeasure = value as? String ?? ""
+    default: break
+    }
+  }
+
+}
+
+extension SwiftISYStatus.Keys {
+  
+  public static let value = "value"
+  public static let formatted = "formatted"
+  public static let unitOfMeasure = "unitOfMeasure"
   
 }
 
