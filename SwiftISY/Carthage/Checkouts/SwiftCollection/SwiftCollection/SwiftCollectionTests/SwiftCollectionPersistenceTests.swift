@@ -312,6 +312,9 @@ extension SwiftCollectionPersistenceTests {
   func testSaveJsonClass() {
     // get struct to test
     let obj = JsonClass(defaults: true)
+    defer {
+      try? obj.remove(jsonStorage: .userDefaults, completion: nil)
+    }
     
     // create expectations
     let se = expectation(description: "Save Failed.")
@@ -486,7 +489,9 @@ extension SwiftCollectionPersistenceTests {
   func testJsonObjectsSaveAndLoad() {
     // get object to test
     let obj = Class2(defaults: true)
-    
+    defer {
+      try? obj.remove(jsonStorage: .userDefaults, completion: nil)
+    }
     // create expectations
     let se = expectation(description: "Save Failed.")
     let le = self.expectation(description: "Load Failed.")
@@ -534,6 +539,9 @@ extension SwiftCollectionPersistenceTests {
   func testJsonObjectsSaveAndRemove() {
     // get object to test
     let obj = Class2(defaults: true)
+    defer {
+      try? obj.remove(jsonStorage: .userDefaults, completion: nil)
+    }
     
     // create expectations
     let se = expectation(description: "Save Failed.")

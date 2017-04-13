@@ -56,6 +56,9 @@ class SwiftCollectionDocumentTests: XCTestCase {
     let le = self.expectation(description: "Load Failed.")
 
     let doc = SCDocument(id: 0x10000)
+    defer {
+      try? doc.remove(jsonStorage: .userDefaults, completion: nil)
+    }
     
     let load = {
       let loaded = SCDocument()

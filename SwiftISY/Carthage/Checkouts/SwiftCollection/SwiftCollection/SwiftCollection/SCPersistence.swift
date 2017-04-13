@@ -274,7 +274,7 @@ open class SCJsonObject: NSObject {
       case _ as NSNull:
         willSerializeProperty(label, value)
       default:
-        // handle objects conforming to this protocol
+        // handle objects conforming to this class
         if let value = value as? SCJsonObject {
           if let theValue = value.jsonObject() {
             willSerializeProperty(label, theValue)
@@ -345,6 +345,8 @@ open class SCJsonObject: NSObject {
    * -----------------------------------------------------------------------------------------------
    */
 
+  fileprivate static let storageKeyRoot = "\(SwiftCollection.bundleId).SCJsonObject"
+
   /// Returns key to be used when reading or writing a JSON serialized object to persistent storage.
   ///
   /// The name of this class is returned by default.
@@ -362,10 +364,10 @@ open class SCJsonObject: NSObject {
   fileprivate func storageKeyPath() throws -> String {
     // get the key
     let key = storageKey()
-    guard key.characters.count > 0 else { throw SwiftCollection.Errors.missingstorageKey }
+    guard key.characters.count > 0 else { throw SwiftCollection.Errors.missingStorageKey }
     
     // return the key with this framework's bundle id
-    return "\(SwiftCollection.bundleId).\(key)"
+    return "\(SCJsonObject.storageKeyRoot).\(key)"
   }
 
   /// Saves this object as a JSON serialized string to the specified persistent storage.
@@ -486,36 +488,55 @@ open class SCJsonObject: NSObject {
   
   /// Loads data from this JSON object.
   ///
+  /// * When JSON is an array, `load(arrayItem, atIndex, json)` is called for each item in the
+  /// array.
+  ///
+  /// * When JSON is a dictionary, properties for this object will be processed using reflection.
   /// `load(propertyWithName, currentValue, json)` is called for each property of this object.
   ///
-  /// Objects implementing this protocol should add logic in that function to populate the
-  /// properties of this object.
+  /// Subclasses of `SCJsonObject` should add logic in the appropriate function to populate this 
+  /// object.
   ///
   /// - Parameter json: JSON object to be loaded.
   /// - Returns: JSON object.
   /// - Throws: `invalidJson` if the JSON object is not an Array or Dictionary.
   open func load(jsonObject json: AnyObject) throws -> AnyObject? {
-    // ensure this json is an array or dictionary
-    guard json is NSArray || json is NSDictionary else { throw SwiftCollection.Errors.invalidJson }
-    
-    // get mirror for reflection
-    let mirror = Mirror(reflecting: self)
-    
-    // check that we have children to process
-    guard mirror.children.count > 0 else { return json }
-    
-    // process each property
-    let dict = json as? NSDictionary
-    for case let (label?, value) in mirror.children {
-      let potentialValue = SwiftCollection.unwrap(any: dict?[label] ?? NSNull())
-      load(propertyWithName: label, currentValue: value, potentialValue: potentialValue, json: json)
+    if json is [AnyObject] || json is ArraySlice<AnyObject> {
+      // get array
+      var array: [AnyObject]?
+      switch json {
+      case let anArray as [AnyObject]: array = anArray
+      case let anArraySlice as ArraySlice<AnyObject>: array = Array(anArraySlice)
+      default: return json
+      }
+      // process each array item
+      for (i, item) in array!.enumerated() {
+        load(arrayItem: item, atIndex: i, json: json)
+      }
+    } else if json is [String: AnyObject] {
+      // get dictionary
+      let dict = json as! [String: AnyObject]
+      
+      // get mirror for reflection
+      let mirror = Mirror(reflecting: self)
+      
+      // check that we have children to process
+      guard mirror.children.count > 0 else { return json }
+      
+      // process each property
+      for case let (label?, value) in mirror.children {
+        let potentialValue = SwiftCollection.unwrap(any: dict[label] ?? NSNull())
+        load(propertyWithName: label, currentValue: value, potentialValue: potentialValue, json: json)
+      }
+    } else {
+      throw SwiftCollection.Errors.invalidJson
     }
     
     return json
   }
   
-  /// Objects implementing this protocol should add logic in this function to populate the
-  /// properties of this object.
+  /// Subclasses of `SCJsonObject` should add logic in this function to populate the properties of 
+  /// this object from a dictionary.
   ///
   /// - Parameters:
   ///   - name: Name of property.
@@ -523,6 +544,17 @@ open class SCJsonObject: NSObject {
   ///   - potentialValue: Possible value from JSON object.
   ///   - json: Complete JSON object with values to be loaded.
   open func load(propertyWithName name: String, currentValue: Any, potentialValue: Any, json: AnyObject) {
+    // nothing to do
+  }
+  
+  /// Subclasses of `SCJsonObject` should add logic in this function to populate this object from
+  /// an array.
+  ///
+  /// - Parameters:
+  ///   - item: Item in array.
+  ///   - i: Index of item in array.
+  ///   - json: Complete JSON object with values to be loaded.
+  open func load(arrayItem item: AnyObject, atIndex i: Int, json: AnyObject) {
     // nothing to do
   }
 

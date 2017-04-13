@@ -18,6 +18,11 @@
 
 import XCTest
 import SwiftISY
+import SwiftCollection
+
+// -------------------------------------------------------------------------------------------------
+// MARK: -
+// -------------------------------------------------------------------------------------------------
 
 class SwiftISYHostTests: XCTestCase {
   
@@ -178,4 +183,50 @@ class SwiftISYHostTests: XCTestCase {
     
   }
   
+}
+
+// -------------------------------------------------------------------------------------------------
+// MARK: -
+// -------------------------------------------------------------------------------------------------
+
+class SwiftISYHostKeyProtocolTests: XCTestCase {
+  
+  var hosts = SwiftISYHosts()
+  
+  fileprivate class hostKeyClass: SwiftISYHostKeyProtocol {
+    required init() { }
+  }
+  
+  override func setUp() {
+    super.setUp()
+    
+    // load hosts from json
+    guard let json =  testResourceJson(forResource: "Hosts", withExtension: "json") else { XCTFail("Failed to load Nodes.json."); return }
+    _ = try? hosts.load(jsonObject: json)
+    try? hosts.save(jsonStorage: .userDefaults, completion: nil)
+  }
+  
+  override func tearDown() {
+    // remove existing hosts
+    try? hosts.remove(jsonStorage: .userDefaults, completion: nil)
+    
+    super.tearDown()
+  }
+
+  func testHostId() {
+    var hkc = hostKeyClass()
+    hkc.hostId = Constants.hostId2
+    XCTAssertEqual(hkc.hostId, Constants.hostId2)
+    hkc.hostId = nil
+    XCTAssertNil(hkc.hostId)
+  }
+  
+  func testHost() {
+    var hkc = hostKeyClass()
+    hkc.hostId = Constants.hostId2
+    let host = hkc.host
+    XCTAssertNotNil(host)
+    XCTAssertEqual(host?.id, Constants.hostId2)
+  }
+
 }

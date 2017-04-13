@@ -23,7 +23,7 @@ import SwiftISY
 class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
   // create request to host
-  let request = SwiftISYRequest(host: SwiftISYHost(host: "your host", user: "your username"))
+  let request = SwiftISYRequest(SwiftISYHost(host: "your host", user: "your username"))
   
   // create array to hold devices
   var nodes: [SwiftISYNode] = []

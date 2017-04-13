@@ -34,6 +34,12 @@ class SwiftCollectionTests: XCTestCase {
     XCTAssertNotNil(SwiftCollection.bundle)
   }
   
+  func testId() {
+    XCTAssertFalse(SwiftCollection.Id(exactly: 0)!.isValid())
+    XCTAssertTrue(SwiftCollection.Id(exactly: 1)!.isValid())
+    XCTAssertTrue(SwiftCollection.Id(exactly: UInt.max)!.isValid())
+  }
+  
   func testHexId() {
     XCTAssertEqual(SwiftCollection.Id(exactly: 0x0001000200030004)!.toHexString(), "0001000200030004")
     XCTAssertEqual(SwiftCollection.Id(exactly: 0x1234567890ABCDEF)!.toHexString(groupEvery: 1), "12-34-56-78-90-AB-CD-EF")

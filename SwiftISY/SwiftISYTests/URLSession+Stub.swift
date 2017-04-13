@@ -35,7 +35,10 @@ public class SwizzledURLSessionDataTask: URLSessionDataTask {
   }
   
   public override func resume() {
-    guard let taskHandler = type(of: self).taskHandler else { return }
+    guard let taskHandler = type(of: self).taskHandler else {
+      assert(false, "Missing taskHandler")
+      return
+    }
     let (data, response, error) = taskHandler(_request);
     DispatchQueue.main.async() {
       self._completionHandler(data, response, error)

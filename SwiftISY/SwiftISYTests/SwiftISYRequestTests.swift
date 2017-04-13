@@ -22,76 +22,21 @@ import SwiftISY
 class SwiftISYRequestTests: XCTestCase {
   
   let host = SwiftISYHost(host: "host", user: "user", password: "password")
-  
-  struct Paths {
     
-    static let nodes = "/rest/nodes"
-    static let statuses = "/rest/status"
-    static let response = "/rest/nodes/24 DD AD 1/cmd/DON"
-    
-  }
-  
-  fileprivate struct RequestError: Error {
-    
-    fileprivate let _localizedDescription: String
-
-    init(_ localizedDescription: String) {
-      _localizedDescription = localizedDescription
-    }
-    
-    var localizedDescription: String {
-      return _localizedDescription
-    }
-    
-  }
-  
   override func setUp() {
     super.setUp()
-    
-    SwizzledURLSessionDataTask.taskHandler = { (request) -> (Data?, URLResponse?, Error?) in
-      var data: Data?
-      var response: URLResponse?
-      var error: Error?
-      
-      // get xml data from request
-      let url = request.url
-      if let path = url?.path {
-        switch path {
-        case Paths.nodes:
-          data = self.testResourceData(forResource: "Nodes", withExtension: "xml")
-        case Paths.statuses:
-          data = self.testResourceData(forResource: "Statuses", withExtension: "xml")
-        case Paths.response:
-          data = self.testResourceData(forResource: "Response", withExtension: "xml")
-        default:
-          break
-        }
-      }
-      
-      // prepare response from data
-      if let data = data {
-        let statusCode = SwiftISY.HttpStatusCodes.ok.rawValue
-        let headerFields: [String: String] = ["Content-Length": String(data.count), "Content-Type": "text/xml; charset=UTF-8"]
-        response = HTTPURLResponse(url: url!, statusCode: statusCode, httpVersion: nil, headerFields: headerFields)
-      } else {
-        let statusCode = SwiftISY.HttpStatusCodes.badRequest.rawValue
-        response = HTTPURLResponse(url: url!, statusCode: statusCode, httpVersion: nil, headerFields: nil)
-        error = RequestError("Bad Request")
-      }
-      
-      return (data, response, error)
-    }
+    setupUrlSessionTest()
   }
   
   override func tearDown() {
-    SwizzledURLSessionDataTask.taskHandler = nil
+    tearDownUrlSessionTest()
     super.tearDown()
   }
   
   func testNodesRequest() {
     let e = expectation(description: Paths.nodes)
 
-    SwiftISYRequest(host: host).nodes { (result) in
+    SwiftISYRequest(host).nodes { (result) in
       e.fulfill()
       
       // test successful request
@@ -108,7 +53,7 @@ class SwiftISYRequestTests: XCTestCase {
         return node.address == "24 DD AD 1"
       }).first
       XCTAssertNotNil(node)
-      XCTAssertEqual(node!.name, "Light 1")
+      XCTAssertEqual(node!.name, "Light 1 (R)")
       XCTAssertEqual(node!.type, "1.32.65.0")
       XCTAssertTrue(node!.enabled)
       XCTAssertEqual(node!.deviceClass, 1)
@@ -120,6 +65,7 @@ class SwiftISYRequestTests: XCTestCase {
       // test status
       XCTAssertEqual(objects.statuses.count, 4)
       let status = objects.statuses["24 DD AD 1"]
+      XCTAssertEqual(status!.address, "24 DD AD 1")
       XCTAssertEqual(status!.value, 75)
       XCTAssertEqual(status!.formatted, "30")
       XCTAssertEqual(status!.unitOfMeasure, "%/on/off")
@@ -129,7 +75,7 @@ class SwiftISYRequestTests: XCTestCase {
       let group = objects.groups.first(where: { (group) -> Bool in
         return group.address == "10028"
       })
-      XCTAssertEqual(group!.name, "Scene 1")
+      XCTAssertEqual(group!.name, "Scene 2 (R)")
       XCTAssertEqual(group!.deviceGroup, 18)
       XCTAssertEqual(group!.elkId, "C16")
       XCTAssertEqual(group!.responderIds, ["24 DD AD 1", "24 EF 96 1", "24 EF 96 3"])
@@ -137,15 +83,14 @@ class SwiftISYRequestTests: XCTestCase {
     }
     
     waitForExpectations(timeout: 60) { (error) in
-      guard error == nil else { XCTFail(); return }
+      guard error == nil else { XCTFail(error!.localizedDescription); return }
     }
   }
 
-  
   func testStatusesRequest() {
     let e = expectation(description: Paths.statuses)
     
-    SwiftISYRequest(host: host).statuses { (result) in
+    SwiftISYRequest(host).statuses { (result) in
       e.fulfill()
       
       // test successful request
@@ -159,21 +104,25 @@ class SwiftISYRequestTests: XCTestCase {
       // test status
       XCTAssertEqual(objects.statuses.count, 4)
       if let status = objects.statuses["24 DD AD 1"] {
+        XCTAssertEqual(status.address, "24 DD AD 1")
         XCTAssertEqual(status.value, 75)
         XCTAssertEqual(status.formatted, "30")
         XCTAssertEqual(status.unitOfMeasure, "%/on/off")
       }
       if let status = objects.statuses["24 EF 96 1"] {
+        XCTAssertEqual(status.address, "24 EF 96 1")
         XCTAssertEqual(status.value, 255)
         XCTAssertEqual(status.formatted, "On")
         XCTAssertEqual(status.unitOfMeasure, "on/off")
       }
       if let status = objects.statuses["24 EF 96 3"] {
+        XCTAssertEqual(status.address, "24 EF 96 3")
         XCTAssertEqual(status.value, 0)
         XCTAssertEqual(status.formatted, "Off")
         XCTAssertEqual(status.unitOfMeasure, "on/off")
       }
       if let status = objects.statuses["24 EF 96 4"] {
+        XCTAssertEqual(status.address, "24 EF 96 4")
         XCTAssertEqual(status.value, 0)
         XCTAssertEqual(status.formatted, "Off")
         XCTAssertEqual(status.unitOfMeasure, "on/off")
@@ -181,14 +130,14 @@ class SwiftISYRequestTests: XCTestCase {
     }
     
     waitForExpectations(timeout: 60) { (error) in
-      guard error == nil else { XCTFail(); return }
+      guard error == nil else { XCTFail(error!.localizedDescription); return }
     }
   }
 
   func testResponseRequest() {
     let e = expectation(description: Paths.response)
     
-    SwiftISYRequest(host: host).on(address: "24 DD AD 1") { (result) in
+    SwiftISYRequest(host).on(address: "24 DD AD 1") { (result) in
       e.fulfill()
 
       // test successful request
@@ -207,7 +156,7 @@ class SwiftISYRequestTests: XCTestCase {
     }
     
     waitForExpectations(timeout: 60) { (error) in
-      guard error == nil else { XCTFail(); return }
+      guard error == nil else { XCTFail(error!.localizedDescription); return }
     }
   }
 

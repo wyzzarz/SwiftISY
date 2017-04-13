@@ -8,7 +8,7 @@
     "flags": {
       "rawValue": 12
     }, 
-    "name": "ISY", 
+    "name": "Scene 1", 
     "responderIds": [
       "24 DD AD 1", 
       "24 EF 96 1", 
@@ -24,11 +24,47 @@
     ], 
     "deviceGroup": 18, 
     "elkId": "C16", 
-    "family": 12,
+    "family": 12, 
     "flags": {
       "rawValue": 132
     }, 
-    "name": "Scene 1", 
+    "name": "Scene 2", 
+    "responderIds": [
+      "24 DD AD 1", 
+      "24 EF 96 1", 
+      "24 EF 96 3"
+    ]
+  }, 
+  {
+    "_id": 7145732503, 
+    "address": "00:21:b9:02:03:90", 
+    "deviceGroup": 0, 
+    "elkId": "", 
+    "family": 6, 
+    "flags": {
+      "rawValue": 12
+    }, 
+    "name": "Scene 3", 
+    "responderIds": [
+      "24 DD AD 1", 
+      "24 EF 96 1", 
+      "24 EF 96 3", 
+      "24 EF 96 4"
+    ]
+  }, 
+  {
+    "_id": 3127395792, 
+    "address": "10027", 
+    "controllerIds": [
+      "24 EF 96 4"
+    ], 
+    "deviceGroup": 18, 
+    "elkId": "C16", 
+    "family": 12, 
+    "flags": {
+      "rawValue": 132
+    }, 
+    "name": "Scene 4", 
     "responderIds": [
       "24 DD AD 1", 
       "24 EF 96 1", 

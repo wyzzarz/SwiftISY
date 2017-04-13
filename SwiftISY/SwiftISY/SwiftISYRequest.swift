@@ -36,7 +36,7 @@ public struct SwiftISYRequest {
   ///
   /// - success: `true` if the request was successful, `false` otherwise.
   /// - error: Contains `Error` if the request failed, `nil` otherwise.
-  /// - objects: Contains `SwiftISYObjects` if the request was successful, `nil` otherwise.
+  /// - objects: Contains `Objects` if the request was successful, `nil` otherwise.
   ///
   public struct Result {
     
@@ -46,11 +46,28 @@ public struct SwiftISYRequest {
     /// Contains `Error` if the request failed, `nil` otherwise.
     public var error: SwiftISY.RequestError?
     
-    /// Contains `SwiftISYObjects` if the request was successful, `nil` otherwise.
-    public var objects: SwiftISYObjects?
+    /// Contains `Objects` if the request was successful, `nil` otherwise.
+    public var objects: Objects?
     
   }
   
+  ///
+  /// Holds a collection of ISY objects returned from a request.
+  ///
+  /// - responses: Array of responses (0 or more) from commands to the host.
+  /// - nodes: Array of nodes (0 or more) returned from the host.
+  /// - groups: Array of groups (0 or more) returned from the host.
+  /// - statuses: Array of statuses (0 or more) for nodes returned from the host.
+  ///
+  public struct Objects {
+    
+    public var responses: [SwiftISYResponse] = []
+    public var nodes: [SwiftISYNode] = []
+    public var groups: [SwiftISYGroup] = []
+    public var statuses: [String: SwiftISYStatus] = [:]
+    
+  }
+
   ///
   /// Closure for completion of a request.
   ///
@@ -94,7 +111,7 @@ public struct SwiftISYRequest {
   ///
   /// - Parameter host: Host for the request.
   ///
-  public init(host: SwiftISYHost) {
+  public init(_ host: SwiftISYHost) {
     self.host = host
   }
   

@@ -3,7 +3,7 @@
   <root />
   <node flag="128">
     <address>24 DD AD 1</address>
-    <name>Light 1</name>
+    <name>Light 1 (R)</name>
     <type>1.32.65.0</type>
     <enabled>true</enabled>
     <deviceClass>1</deviceClass>
@@ -15,7 +15,7 @@
   </node>
   <node flag="128">
     <address>24 EF 96 1</address>
-    <name>Light 2</name>
+    <name>Light 2 (R)</name>
     <type>2.44.65.0</type>
     <enabled>true</enabled>
     <deviceClass>0</deviceClass>
@@ -27,7 +27,7 @@
   </node>
   <node flag="0">
     <address>24 EF 96 3</address>
-    <name>Light 3</name>
+    <name>Light 3 (R)</name>
     <type>2.44.65.0</type>
     <enabled>true</enabled>
     <deviceClass>0</deviceClass>
@@ -39,7 +39,7 @@
   </node>
   <node flag="0">
     <address>24 EF 96 4</address>
-    <name>Switch 1</name>
+    <name>Switch 1 (R)</name>
     <type>2.44.65.0</type>
     <enabled>true</enabled>
     <deviceClass>0</deviceClass>
@@ -47,11 +47,11 @@
     <dcPeriod>0</dcPeriod>
     <pnode>24 EF 96 1</pnode>
     <ELK_ID>B07</ELK_ID>
-    <property id="ST" value="0" formatted="Off" uom="on/off" />
+    <property id="ST" value="255" formatted="On" uom="on/off" />
   </node>
   <group flag="12">
     <address>00:21:b9:02:03:89</address>
-    <name>ISY</name>
+    <name>Scene 1 (R)</name>
     <family>6</family>
     <members>
       <link type="0">24 DD AD 1</link>
@@ -62,7 +62,7 @@
   </group>
   <group flag="132">
     <address>10028</address>
-    <name>Scene 1</name>
+    <name>Scene 2 (R)</name>
     <deviceGroup>18</deviceGroup>
     <ELK_ID>C16</ELK_ID>
     <members>

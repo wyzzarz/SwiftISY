@@ -29,6 +29,13 @@ extension SwiftCollection.Id {
   
   /// Returns `true` if the current device has a 64-bit CPU; `false` otherwise.
   public static let is64Bit = MemoryLayout<UInt>.size == MemoryLayout<UInt64>.size
+
+  /// Returns whether the id is a valid value.
+  ///
+  /// - Returns: `true` if the id is a value greater than 0; `false` otherwise.
+  public func isValid() -> Bool {
+    return self > SwiftCollection.Id(0)
+  }
   
   /// Generates a random primary key within the upper and lower bounds.
   ///

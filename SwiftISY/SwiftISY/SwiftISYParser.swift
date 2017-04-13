@@ -25,13 +25,13 @@ internal class SwiftISYParser: NSObject {
   
   // XML
   var parser: XMLParser
-  var completion: ((_ objects: SwiftISYObjects) -> Void)?
+  var completion: ((_ objects: SwiftISYRequest.Objects) -> Void)?
   var texts: [String] = []
   var attributes: [[String: String]] = []
   var currentIndex: Int? { get { return texts.count > 0 && texts.count == attributes.count ? texts.count - 1 : nil } }
 
   // Objects
-  var objects = SwiftISYObjects()
+  var objects = SwiftISYRequest.Objects()
   
   // Group
   var isProcessingGroup = false
@@ -62,7 +62,7 @@ internal class SwiftISYParser: NSObject {
 
 extension SwiftISYParser: XMLParserDelegate {
 
-  func parse(completion: @escaping (_ objects: SwiftISYObjects) -> Void) -> SwiftISYParser {
+  func parse(completion: @escaping (_ objects: SwiftISYRequest.Objects) -> Void) -> SwiftISYParser {
     self.completion = completion
     parser.parse()
     return self
@@ -127,6 +127,7 @@ extension SwiftISYParser: XMLParserDelegate {
       }
       guard let node = currentNode else { return }
       guard let status = currentStatus else { return }
+      status.address = node.address
       objects.statuses[node.address] = status
     } else if elementName == SwiftISY.Elements.restResponse {
       // process rest response

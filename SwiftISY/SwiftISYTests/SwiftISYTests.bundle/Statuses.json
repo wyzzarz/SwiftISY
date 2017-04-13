@@ -1,24 +1,28 @@
 [
   {
     "_id": 3115472222, 
+    "address": "24 EF 96 4", 
     "formatted": "Off", 
     "unitOfMeasure": "on/off", 
     "value": 0
   }, 
   {
     "_id": 3097085496, 
+    "address": "24 EF 96 3", 
     "formatted": "Off", 
     "unitOfMeasure": "on/off", 
     "value": 0
   }, 
   {
     "_id": 3611344313, 
+    "address": "24 EF 96 1", 
     "formatted": "On", 
     "unitOfMeasure": "on/off", 
     "value": 255
   }, 
   {
     "_id": 4063923215, 
+    "address": "24 DD AD 1", 
     "formatted": "30", 
     "unitOfMeasure": "%/on/off", 
     "value": 75

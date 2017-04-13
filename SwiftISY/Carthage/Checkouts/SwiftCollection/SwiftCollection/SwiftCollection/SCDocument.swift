@@ -53,7 +53,7 @@ open class SCDocument: SCJsonObject {
   
   /// Returns `true` if `id` has a value with a length greater than zero; `false` otherwise.
   final public func hasId() -> Bool {
-    return id > 0
+    return id.isValid()
   }
  
   /*

@@ -7,12 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9959E4FF1E9AA0E900D376A9 /* SwiftISYControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9959E4FE1E9AA0E900D376A9 /* SwiftISYControllerTests.swift */; };
 		998139511E9016BB00D0D72E /* SwiftCollection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99E4D3FC1E8378850054040C /* SwiftCollection.framework */; };
 		998139591E94081B00D0D72E /* SwiftISYTests.bundle in Resources */ = {isa = PBXBuildFile; fileRef = 998139581E94081B00D0D72E /* SwiftISYTests.bundle */; };
 		9981395B1E94087100D0D72E /* XCTestCase+SwiftISY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9981395A1E94087100D0D72E /* XCTestCase+SwiftISY.swift */; };
 		9981395D1E940D6F00D0D72E /* SwiftISYNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9981395C1E940D6F00D0D72E /* SwiftISYNodeTests.swift */; };
 		9981395F1E97169C00D0D72E /* SwiftISYGroupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9981395E1E97169C00D0D72E /* SwiftISYGroupTests.swift */; };
 		998139611E971D6100D0D72E /* SwiftISYStatusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 998139601E971D6100D0D72E /* SwiftISYStatusTests.swift */; };
+		998139631E97335E00D0D72E /* SwiftISYController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 998139621E97335E00D0D72E /* SwiftISYController.swift */; };
 		99863A851E4D6C0D001DAB3B /* SwiftISY.h in Headers */ = {isa = PBXBuildFile; fileRef = 99863A831E4D6C0D001DAB3B /* SwiftISY.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		99863AC41E4ECB27001DAB3B /* SwiftISY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC31E4ECB27001DAB3B /* SwiftISY.swift */; };
 		99863AC61E4ECF15001DAB3B /* SwiftISYRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99863AC51E4ECF15001DAB3B /* SwiftISYRequest.swift */; };
@@ -21,6 +23,11 @@
 		998C434D1E882CE7004B8EC1 /* SwiftISYRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 998C434C1E882CE7004B8EC1 /* SwiftISYRequestTests.swift */; };
 		998C43611E889ABE004B8EC1 /* URLSession+Stub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 998C43601E889ABE004B8EC1 /* URLSession+Stub.swift */; };
 		99E4D3FD1E8378850054040C /* SwiftCollection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99E4D3FC1E8378850054040C /* SwiftCollection.framework */; };
+		99EA5A8A1EBECC4B009A835E /* SwiftISYObject+Response.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99EA5A891EBECC4B009A835E /* SwiftISYObject+Response.swift */; };
+		99EA5A8C1EBECC97009A835E /* SwiftISYObject+Status.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99EA5A8B1EBECC97009A835E /* SwiftISYObject+Status.swift */; };
+		99EA5A8E1EBECDE5009A835E /* SwiftISYObject+Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99EA5A8D1EBECDE5009A835E /* SwiftISYObject+Group.swift */; };
+		99EA5A901EBECE22009A835E /* SwiftISYObject+Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99EA5A8F1EBECE22009A835E /* SwiftISYObject+Node.swift */; };
+		99EA5A921EBECF36009A835E /* SwiftISYObject+Host.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99EA5A911EBECF36009A835E /* SwiftISYObject+Host.swift */; };
 		99F855061E5CDE3800AB3D71 /* SwiftISYHostTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F855051E5CDE3800AB3D71 /* SwiftISYHostTests.swift */; };
 		99F855081E5CDE3800AB3D71 /* SwiftISY.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 99863A801E4D6C0D001DAB3B /* SwiftISY.framework */; };
 /* End PBXBuildFile section */
@@ -36,11 +43,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		9959E4FE1E9AA0E900D376A9 /* SwiftISYControllerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYControllerTests.swift; sourceTree = "<group>"; };
 		998139581E94081B00D0D72E /* SwiftISYTests.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = SwiftISYTests.bundle; sourceTree = "<group>"; };
 		9981395A1E94087100D0D72E /* XCTestCase+SwiftISY.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "XCTestCase+SwiftISY.swift"; sourceTree = "<group>"; };
 		9981395C1E940D6F00D0D72E /* SwiftISYNodeTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYNodeTests.swift; sourceTree = "<group>"; };
 		9981395E1E97169C00D0D72E /* SwiftISYGroupTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYGroupTests.swift; sourceTree = "<group>"; };
 		998139601E971D6100D0D72E /* SwiftISYStatusTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYStatusTests.swift; sourceTree = "<group>"; };
+		998139621E97335E00D0D72E /* SwiftISYController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYController.swift; sourceTree = "<group>"; };
 		99863A801E4D6C0D001DAB3B /* SwiftISY.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftISY.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		99863A831E4D6C0D001DAB3B /* SwiftISY.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SwiftISY.h; sourceTree = "<group>"; };
 		99863A841E4D6C0D001DAB3B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = SwiftISY/Info.plist; sourceTree = "<group>"; };
@@ -54,6 +63,11 @@
 		998C43601E889ABE004B8EC1 /* URLSession+Stub.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "URLSession+Stub.swift"; sourceTree = "<group>"; };
 		99E4D3F91E83773F0054040C /* Cartfile */ = {isa = PBXFileReference; lastKnownFileType = text; path = Cartfile; sourceTree = "<group>"; };
 		99E4D3FC1E8378850054040C /* SwiftCollection.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftCollection.framework; path = Carthage/Build/iOS/SwiftCollection.framework; sourceTree = "<group>"; };
+		99EA5A891EBECC4B009A835E /* SwiftISYObject+Response.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "SwiftISYObject+Response.swift"; sourceTree = "<group>"; };
+		99EA5A8B1EBECC97009A835E /* SwiftISYObject+Status.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "SwiftISYObject+Status.swift"; sourceTree = "<group>"; };
+		99EA5A8D1EBECDE5009A835E /* SwiftISYObject+Group.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "SwiftISYObject+Group.swift"; sourceTree = "<group>"; };
+		99EA5A8F1EBECE22009A835E /* SwiftISYObject+Node.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "SwiftISYObject+Node.swift"; sourceTree = "<group>"; };
+		99EA5A911EBECF36009A835E /* SwiftISYObject+Host.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "SwiftISYObject+Host.swift"; sourceTree = "<group>"; };
 		99F855031E5CDE3800AB3D71 /* SwiftISYTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftISYTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		99F855051E5CDE3800AB3D71 /* SwiftISYHostTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftISYHostTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -107,6 +121,12 @@
 				99863AC51E4ECF15001DAB3B /* SwiftISYRequest.swift */,
 				99863AC71E4ECF38001DAB3B /* SwiftISYParser.swift */,
 				99863AC81E4ECF38001DAB3B /* SwiftISYObject.swift */,
+				99EA5A911EBECF36009A835E /* SwiftISYObject+Host.swift */,
+				99EA5A8F1EBECE22009A835E /* SwiftISYObject+Node.swift */,
+				99EA5A8D1EBECDE5009A835E /* SwiftISYObject+Group.swift */,
+				99EA5A8B1EBECC97009A835E /* SwiftISYObject+Status.swift */,
+				99EA5A891EBECC4B009A835E /* SwiftISYObject+Response.swift */,
+				998139621E97335E00D0D72E /* SwiftISYController.swift */,
 			);
 			path = SwiftISY;
 			sourceTree = "<group>";
@@ -141,6 +161,7 @@
 				9981395E1E97169C00D0D72E /* SwiftISYGroupTests.swift */,
 				998139601E971D6100D0D72E /* SwiftISYStatusTests.swift */,
 				998C434C1E882CE7004B8EC1 /* SwiftISYRequestTests.swift */,
+				9959E4FE1E9AA0E900D376A9 /* SwiftISYControllerTests.swift */,
 			);
 			path = SwiftISYTests;
 			sourceTree = "<group>";
@@ -277,9 +298,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				99863AC41E4ECB27001DAB3B /* SwiftISY.swift in Sources */,
+				99EA5A8A1EBECC4B009A835E /* SwiftISYObject+Response.swift in Sources */,
 				99863AC61E4ECF15001DAB3B /* SwiftISYRequest.swift in Sources */,
+				99EA5A8C1EBECC97009A835E /* SwiftISYObject+Status.swift in Sources */,
 				99863ACA1E4ECF38001DAB3B /* SwiftISYObject.swift in Sources */,
 				99863AC91E4ECF38001DAB3B /* SwiftISYParser.swift in Sources */,
+				99EA5A921EBECF36009A835E /* SwiftISYObject+Host.swift in Sources */,
+				99EA5A901EBECE22009A835E /* SwiftISYObject+Node.swift in Sources */,
+				99EA5A8E1EBECDE5009A835E /* SwiftISYObject+Group.swift in Sources */,
+				998139631E97335E00D0D72E /* SwiftISYController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -288,6 +315,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				99F855061E5CDE3800AB3D71 /* SwiftISYHostTests.swift in Sources */,
+				9959E4FF1E9AA0E900D376A9 /* SwiftISYControllerTests.swift in Sources */,
 				9981395B1E94087100D0D72E /* XCTestCase+SwiftISY.swift in Sources */,
 				998139611E971D6100D0D72E /* SwiftISYStatusTests.swift in Sources */,
 				9981395D1E940D6F00D0D72E /* SwiftISYNodeTests.swift in Sources */,

@@ -97,9 +97,9 @@ class OrderedSet: SCOrderedSet<Document> {
 let orderedSet = OrderedSet()
 
 // add documents to the collection
-try? orderedSet.append(document: Document(id: 1, name: "First"))
-try? orderedSet.append(document: Document(id: 2, name: "Second"))
-try? orderedSet.append(document: Document(id: 3, name: "Third"))
+try? orderedSet.append(Document(id: 1, name: "First"))
+try? orderedSet.append(Document(id: 2, name: "Second"))
+try? orderedSet.append(Document(id: 3, name: "Third"))
 
 // example to save the collection to persistent storage.  And load saved data from persistent
 // storage.
@@ -108,6 +108,7 @@ try? orderedSet.save(jsonStorage: .userDefaults) { (success) in
   var anotherOrderedSet = OrderedSet()
   try? anotherOrderedSet.load(jsonStorage: .userDefaults) { (success, json) in
     print("loaded", success)
+    try? OrderedSet().remove(jsonStorage: .userDefaults, completion: nil)
   }
 }
 

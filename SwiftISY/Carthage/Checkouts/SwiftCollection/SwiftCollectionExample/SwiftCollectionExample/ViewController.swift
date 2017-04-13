@@ -61,7 +61,7 @@ class OrderedSet: SCOrderedSet<Document> {
   override func load(jsonObject json: AnyObject) throws -> AnyObject? {
     if let array = json as? [AnyObject] {
       for item in array {
-        try? append(document: Document(json: item))
+        try? append(Document(json: item))
       }
     }
     return json
@@ -80,9 +80,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     super.viewDidLoad()
     
     // add documents to the collection
-    try? orderedSet.append(document: Document(id: 1, name: "First"))
-    try? orderedSet.append(document: Document(id: 2, name: "Second"))
-    try? orderedSet.append(document: Document(id: 3, name: "Third"))
+    try? orderedSet.append(Document(id: 1, name: "First"))
+    try? orderedSet.append(Document(id: 2, name: "Second"))
+    try? orderedSet.append(Document(id: 3, name: "Third"))
 
     tableView.dataSource = self
     tableView.delegate = self
@@ -102,6 +102,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
       let anotherOrderedSet = OrderedSet()
       try? anotherOrderedSet.load(jsonStorage: .userDefaults) { (success, json) in
         print("loaded", success)
+        try? OrderedSet().remove(jsonStorage: .userDefaults, completion: nil)
       }
     }
   }
