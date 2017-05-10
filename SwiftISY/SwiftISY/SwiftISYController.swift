@@ -19,6 +19,9 @@
 import Foundation
 import SwiftCollection
 
+/// `SwiftISYController` provides a shared instance singleton to interact with registered hosts.
+/// The controller handles requests to ISY hosts.  It maintains a list of nodes and groups and the
+/// status of each.
 public class SwiftISYController {
   
   /// Shared instance to be used for this controller.

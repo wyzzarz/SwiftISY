@@ -23,14 +23,20 @@ import SwiftCollection
 // MARK: -
 // -------------------------------------------------------------------------------------------------
 
+/// Associates a host to the object that adopts this protocol.  The host is identified by its `id`.
 public protocol SwiftISYHostKeyProtocol {
   
+  /// `id` of host; or `nil` if none.
   var hostId: SwiftCollection.Id? { get set }
   
-  var host: SwiftISYHost? { get set }
+  /// Returns a host object for the host id; or `nil` if it does not exist.
+  var host: SwiftISYHost? { get }
   
   init()
   
+  /// Initializes with this host.
+  ///
+  /// - Parameter hostId: `Id' of host.
   init(hostId: SwiftCollection.Id)
   
 }
@@ -42,7 +48,7 @@ extension SwiftISYHostKeyProtocol {
       return objc_getAssociatedObject(self, &SwiftISY.AssociatedKeys.hostIdKey) as? SwiftCollection.Id
     }
     set {
-      self.host = nil
+      setHost(nil)
       objc_setAssociatedObject(self, &SwiftISY.AssociatedKeys.hostIdKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
     }
   }
@@ -62,13 +68,14 @@ extension SwiftISYHostKeyProtocol {
       let thisHost = (hosts.filter { (host) -> Bool in
         return host.id == hostId
       }).first
-      objc_setAssociatedObject(self, &SwiftISY.AssociatedKeys.hostKey, thisHost, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+      setHost(thisHost)
       
       return thisHost
     }
-    set {
-      objc_setAssociatedObject(self, &SwiftISY.AssociatedKeys.hostKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-    }
+  }
+
+  fileprivate func setHost(_ host: SwiftISYHost?) {
+    objc_setAssociatedObject(self, &SwiftISY.AssociatedKeys.hostKey, host, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
   }
   
   public init(hostId: SwiftCollection.Id) {
@@ -82,16 +89,31 @@ extension SwiftISYHostKeyProtocol {
 // MARK: -
 // -------------------------------------------------------------------------------------------------
 
+/// Associates a set of addresses for objects that adopt this protocol.  This protocol should be
+/// adopted by a collection.
 public protocol SwiftISYAddressesProtocol {
 
   associatedtype SwiftISYAddressesProtocolElement: SCDocument
   
+  /// Set of ISY device addresses.
   var addresses: NSOrderedSet { get }
 
+  /// Returns the location of the specified address.
+  ///
+  /// - Parameter address: Address to be located.
+  /// - Returns: Index of the address; or `NSNotFound`
   func index(ofAddress address: String) -> Int
   
+  /// Tests whether address exists in the collection
+  ///
+  /// - Parameter address: Address to br located.
+  /// - Returns: `true` if the address exists in the collection; `false` otherwise.
   func contains(address: String) -> Bool
-  
+
+  /// Returns the document for this address.
+  ///
+  /// - Parameter address: Address to be located.
+  /// - Returns: The document for this address; or `nil` if the address does not exist.
   func document(address: String) -> SwiftISYAddressesProtocolElement?
   
 }
@@ -107,18 +129,10 @@ extension SwiftISYAddressesProtocol {
     }
   }
 
-  /// Returns the location of the specified address.
-  ///
-  /// - Parameter address: Address to be located.
-  /// - Returns: Index of the address; or `NSNotFound`
   final public func index(ofAddress address: String) -> Int {
     return addresses.index(of: address)
   }
 
-  /// Tests whether address exists in the collection
-  ///
-  /// - Parameter address: Address to br located.
-  /// - Returns: `true` if the address exists in the collection; `false` otherwise.
   final public func contains(address: String) -> Bool {
     return index(ofAddress: address) != NSNotFound
   }

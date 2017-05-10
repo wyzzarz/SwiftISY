@@ -33,7 +33,7 @@ Additional functionality will be added in the future.
 import SwiftISY
 
 // create a request
-let request = SwiftISYRequest(host: SwiftISYHost(host: "your host", user: "your username", password: "your password"))
+let request = SwiftISYRequest(SwiftISYHost(host: "your host", user: "your username", password: "your password"))
 
 // get all nodes for this host
 request.nodes { (results) in

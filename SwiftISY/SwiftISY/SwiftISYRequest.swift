@@ -96,7 +96,7 @@ public struct SwiftISYRequest {
   /// The following example creates a request to get all nodes and processes each node returned.
   ///
   ///     // create a request
-  ///     let request = SwiftISYRequest(host: SwiftISYHost(host: "your host", user: "your username", password: "your password"))
+  ///     let request = SwiftISYRequest(SwiftISYHost(host: "your host", user: "your username", password: "your password"))
   ///
   ///     // get all nodes for this host
   ///     request.nodes { (results) in
