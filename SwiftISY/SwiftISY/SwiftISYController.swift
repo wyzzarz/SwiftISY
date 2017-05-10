@@ -21,6 +21,7 @@ import SwiftCollection
 
 public class SwiftISYController {
   
+  /// Shared instance to be used for this controller.
   static public let sharedInstance = SwiftISYController()
 
   public typealias Completion = (_ success: Bool) -> Void
@@ -106,6 +107,7 @@ public class SwiftISYController {
     self.storage = storage
     DispatchQueue.main.async {
       self.reload(refresh: refresh)
+      self.notificationsEnabled = self._notificationsEnabled
     }
   }
   
@@ -342,5 +344,63 @@ public class SwiftISYController {
       _ = statuses.remove(status)
     }
   }
+  
+  // -------------------------------------------------------------------------------------------------
+  // MARK: - Notifications
+  // -------------------------------------------------------------------------------------------------
+  
+  /// Whether notifications are sent to observers.
+  public var notificationsEnabled: Bool {
+    get {
+      return _notificationsEnabled
+    }
+    set {
+      _notificationsEnabled = newValue
+      toggleNotifications()
+    }
+  }
+  fileprivate var _notificationsEnabled = true
 
+  /// Whether notifications are sent when the application returns from the background and becomes
+  /// active.
+  public var onResumeEnabled: Bool {
+    get {
+      return _onResumeEnabled
+    }
+    set {
+      _onResumeEnabled = newValue
+      toggleNotifications()
+    }
+  }
+  fileprivate var _onResumeEnabled = true
+  
+  /// Called when the application returns from the background and becomes active.
+  ///
+  /// `onResumeEnabled` must be `true` in order for this function to be called.
+  @objc public func onResume() {
+    DispatchQueue.main.async {
+      self.refresh { (success) in
+        NotificationCenter.default.post(name: .onResume, object: nil)
+      }
+    }
+  }
+  
+  /// Updates `NotificationCenter` for notifications sent from this framework.
+  fileprivate func toggleNotifications() {
+    let nc = NotificationCenter.default
+    
+    // exit if notifications are off
+    guard _notificationsEnabled else {
+      nc.removeObserver(self)
+      return
+    }
+    
+    // handle on resume
+    if _onResumeEnabled {
+      nc.addObserver(self, selector: #selector(onResume), name: .UIApplicationWillEnterForeground, object: nil)
+    } else {
+      nc.removeObserver(self, name: .UIApplicationWillEnterForeground, object: nil)
+    }
+  }
+  
 }

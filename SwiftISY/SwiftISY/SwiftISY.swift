@@ -456,3 +456,14 @@ extension SwiftISY {
   }
   
 }
+
+// -------------------------------------------------------------------------------------------------
+// MARK: - Notifications
+// -------------------------------------------------------------------------------------------------
+
+extension Notification.Name {
+  
+  /// Sent when the application returns from the background and is active.
+  public static let onResume = Notification.Name("\(SwiftISY.bundleId).onResume")
+  
+}
