@@ -21,10 +21,32 @@ import SwiftCollection
 
 public class SwiftISYHosts: SCOrderedSet<SwiftISYHost> {
   
+  public struct SortId {
+    
+    public static let friendlyName = SwiftISYHosts.Sort.SortId("friendlyName")!
+    public static let host = SwiftISYHosts.Sort.SortId("host")!
+    
+  }
+  
+  public required init() {
+    super.init()
+    sorting.sortId = SortId.friendlyName
+    sorting.add(SortId.friendlyName) { (h1, h2) -> Bool in
+      return h1.friendlyName.compare(h2.friendlyName) == .orderedAscending
+    }
+    sorting.add(SortId.host) { (h1, h2) -> Bool in
+      return h1.host.compare(h2.host) == .orderedAscending
+    }
+  }
+  
+  public required init(json: AnyObject) throws {
+    try super.init(json: json)
+  }
+
   override open func load(jsonObject json: AnyObject) throws -> AnyObject? {
     if let array = json as? [AnyObject] {
       for item in array {
-        try append(SwiftISYHost(json: item))
+        try add(SwiftISYHost(json: item))
       }
     }
     return json
@@ -105,11 +127,12 @@ public class SwiftISYHost: SCDocument {
   ///   - host: A host name or IP address.
   ///   - user: A username for authentication.
   ///   - password: Optional password for authentication.
-  public convenience init(id: SwiftCollection.Id = 0, host: String, user: String, password: String? = nil) {
+  public convenience init(id: SwiftCollection.Id = 0, host: String, user: String, password: String? = nil, friendlyName: String? = nil) {
     self.init(id: id)
     self.host = host
     self.user = user
     _password = password
+    if let friendlyName = friendlyName { self.friendlyName = friendlyName }
   }
   
   open override func jsonObject(willSerializeProperty label: String, value: Any) -> (newLabel: String, newValue: Any?) {

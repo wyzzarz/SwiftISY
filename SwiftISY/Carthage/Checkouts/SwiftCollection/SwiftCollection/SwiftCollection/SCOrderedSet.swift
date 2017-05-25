@@ -55,9 +55,26 @@ public protocol SCOrderedSetDelegate {
   ///
   /// - Parameters:
   ///   - document: Document that was appended.
-  ///   - success: `true` if the document was inserted; `false` otherwise.  Documents are not
+  ///   - success: `true` if the document was appended; `false` otherwise.  Documents are not
   ///     appended if they already exist in the collection.
   func didAppend(_ document: Document, success: Bool)
+  
+  /// Tells the delegate that a document will be added into the collection.
+  ///
+  /// - Parameters:
+  ///   - document: Document to be added.
+  ///   - i: Position to add document.
+  /// - Returns: `true` if the document can be added; `false` otherwise.
+  func willAdd(_ document: Document, at i: Int) throws -> Bool
+  
+  /// Tells the delegate that a document was added.
+  ///
+  /// - Parameters:
+  ///   - document: Document that was added.
+  ///   - i: Position of added document.
+  ///   - success: `true` if the document was added; `false` otherwise.  Documents are not
+  ///     added if they already exist in the collection.
+  func didAdd(_ document: Document, at i: Int, success: Bool)
 
   /// Tells the delegate that a document will be removed from the collection.
   ///
@@ -122,6 +139,7 @@ open class SCOrderedSet<Element: SCDocument>: SCJsonObject, SCOrderedSetDelegate
   /// Creates an instance of `SCOrderedSet`.
   public required init() {
     super.init()
+    self.sorting.needsSort = { self.sort() }
   }
   
   public required init(json: AnyObject) throws {
@@ -157,7 +175,7 @@ open class SCOrderedSet<Element: SCDocument>: SCJsonObject, SCOrderedSetDelegate
    */
   
   override open var description: String {
-    return String(describing: ids)
+    return String(describing: elements)
   }
 
   /*
@@ -440,7 +458,69 @@ open class SCOrderedSet<Element: SCDocument>: SCJsonObject, SCOrderedSetDelegate
     }
     didEndChanges()
   }
+
+  /// Inserts the document into the collection based on the default sort.  If there is no sort, then
+  /// the document is added to the end of the collection.
+  ///
+  /// - Parameters:
+  ///   - document: Document to be added.
+  /// - Throws: `missingId` if the document has no id.
+  open func add(_ document: Element) throws {
+    try add(document, multipleChanges: false)
+  }
   
+  /// Inserts the document into the collection based on the default sort.  If there is no sort, then
+  /// the document is added to the end of the collection.
+  ///
+  /// - Parameters:
+  ///   - document: Document to be added.
+  ///   - multipleChanges: `true` if willStartChanges() and didEndChanges() will be executed from another
+  ///     routine; `false` otherwise.  Defuault is `false`.
+  /// - Throws: `missingId` if the document has no id.
+  fileprivate func add(_ document: Element, multipleChanges: Bool) throws {
+    if !multipleChanges { willStartChanges() }
+    
+    // get location to insert
+    let i = sortedIndex(document)
+    
+    guard try willAdd(document, at: i) else {
+      didAdd(document, at: i, success: false)
+      if !multipleChanges { didEndChanges() }
+      return
+    }
+    
+    // ensure the document has an id
+    guard document.hasId() else { throw SwiftCollection.Errors.missingId }
+    guard !ids.contains(document.id) else {
+      didAdd(document, at: i, success: false)
+      if !multipleChanges { didEndChanges() }
+      return
+    }
+    
+    elements.insert(document, at: i)
+    ids.insert(document.id, at: i)
+    createdIds.remove(document.id)
+    
+    didAdd(document, at: i, success: true)
+    if !multipleChanges { didEndChanges() }
+  }
+  
+  /// Inserts the documents into the collection based on the default sort.  If there is no sort,
+  /// then the documents are added to the end of the collection.
+  ///
+  /// - Parameter newDocuments: A collection of documents to be added.
+  /// - Throws: `missingId` if a document has no id.
+  open func add<C : Collection>(contentsOf newDocuments: C) throws where C.Iterator.Element == Element {
+    willStartChanges()
+    let newTotal = ids.count + Int(newDocuments.count.toIntMax())
+    elements.reserveCapacity(newTotal)
+    for d in newDocuments {
+      if ids.contains(d.id) { continue }
+      try self.add(d, multipleChanges: true)
+    }
+    didEndChanges()
+  }
+
   /*
    * -----------------------------------------------------------------------------------------------
    * MARK: - Remove
@@ -614,6 +694,107 @@ open class SCOrderedSet<Element: SCDocument>: SCJsonObject, SCOrderedSetDelegate
 
   /*
    * -----------------------------------------------------------------------------------------------
+   * MARK: - Sort
+   * -----------------------------------------------------------------------------------------------
+   */
+
+  public class Sort {
+    
+    public typealias SortId = String
+    
+    /// Tests whether `e1` should be ordered before `e2`.
+    ///
+    /// - Parameters:
+    ///   - e1: First argument.
+    ///   - e2: Second argument.
+    /// - Returns: `true` if `e1` should be ordered before `e2`; `false` otherwise.
+    public typealias SortComparator = (_ e1: Element, _ e2: Element) -> Bool
+    
+    fileprivate var needsSort: (() -> Void)?
+    
+    /// Default sort identifier to be used when adding an element to this collection.
+    public var sortId: SortId? {
+      get {
+        return _sortId
+      }
+      set {
+        _sortId = newValue
+        if let needsSort = self.needsSort { needsSort() }
+      }
+    }
+    fileprivate var _sortId: SortId?
+    
+    /// Returns a sort comparator for this sort id.
+    ///
+    /// - Parameter sortId: Sort id to be used.
+    /// - Returns: The sort comparator for this id.
+    public func comparator(_ sortId: SortId? = nil) -> SortComparator? {
+      let aSortId = sortId ?? self.sortId
+      guard aSortId != nil else { return nil }
+      return sortComparators[aSortId!]
+    }
+    fileprivate var sortComparators: [SortId: SortComparator] = [:]
+    
+    /// Adds a sort comparator for this sort id.
+    ///
+    /// - Parameters:
+    ///   - sortId: Sort id to be used.
+    ///   - comparator: The sort comparator to be added.
+    public func add(_ sortId: SortId, comparator: @escaping SortComparator) {
+      sortComparators[sortId] = comparator
+      guard let needsSort = self.needsSort else { return }
+      guard let aSortId = self.sortId else { return }
+      if aSortId == sortId { needsSort() }
+    }
+    
+    /// Removes a sort comparator for this sort id.
+    ///
+    /// - Parameter sortId: Sort id to be removed.
+    public func remove(_ sortId: SortId) {
+      sortComparators.removeValue(forKey: sortId)
+    }
+    
+    /// Removes all sort comparators.
+    public func removeAll() {
+      sortComparators.removeAll()
+    }
+    
+  }
+  
+  /// Default sort and sorting comparators for the collection.
+  public var sorting = Sort()
+  
+  /// Returns the index in the collection to add this document using the default sort.
+  ///
+  /// - Parameter document: Document to add.
+  /// - Returns: Index to insert; or the end index of the collection.
+  fileprivate func sortedIndex(_ document: Element) -> Int {
+    // if there is no comparator, then return index for end of collection.
+    guard let c = sorting.comparator() else { return elements.endIndex }
+    // if there are no documents, then return index for end of collection.
+    guard elements.count > 0 else { return elements.endIndex }
+    // check if the document should be last.
+    if !c(document, elements.last!) { return elements.endIndex }
+    // find the location in the collection.
+    for (i, element) in elements.enumerated() {
+      if !c(document, element) { continue }
+      return i
+    }
+    // otherwise return the end index of the collection
+    return elements.endIndex
+  }
+  
+  public func sort() {
+    guard let c = sorting.comparator() else { return }
+    self.elements = self.sorted(by: c)
+    self.ids.removeAllObjects()
+    for element in elements {
+      ids.add(element.id)
+    }
+  }
+
+  /*
+   * -----------------------------------------------------------------------------------------------
    * MARK: - Delegate
    * -----------------------------------------------------------------------------------------------
    */
@@ -631,6 +812,10 @@ open class SCOrderedSet<Element: SCDocument>: SCJsonObject, SCOrderedSetDelegate
   open func willAppend(_ document: Document) throws -> Bool { return true }
   
   open func didAppend(_ document: Document, success: Bool) { }
+
+  open func willAdd(_ document: Document, at i: Int) throws -> Bool { return true }
+  
+  open func didAdd(_ document: Document, at i: Int, success: Bool) { }
   
   open func willRemove(_ document: Document) -> Bool { return true }
   

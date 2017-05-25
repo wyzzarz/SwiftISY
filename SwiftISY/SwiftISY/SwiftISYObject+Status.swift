@@ -21,6 +21,24 @@ import SwiftCollection
 
 public class SwiftISYStatuses: SCOrderedSet<SwiftISYStatus>, SwiftISYHostKeyProtocol, SwiftISYAddressesProtocol {
   
+  public struct SortId {
+    
+    public static let address = SwiftISYNodes.Sort.SortId("address")!
+    
+  }
+  
+  public required init() {
+    super.init()
+    sorting.sortId = SortId.address
+    sorting.add(SortId.address) { (s1, s2) -> Bool in
+      return s1.address.compare(s2.address) == .orderedAscending
+    }
+  }
+  
+  public required init(json: AnyObject) throws {
+    try super.init(json: json)
+  }
+
   override open func storageKey() -> String {
     guard let hostId = self.hostId else { return "" }
     guard hostId.isValid() else { return "" }
@@ -28,7 +46,7 @@ public class SwiftISYStatuses: SCOrderedSet<SwiftISYStatus>, SwiftISYHostKeyProt
   }
   
   override open func load(arrayItem item: AnyObject, atIndex i: Int, json: AnyObject) {
-    try? append(SwiftISYStatus(json: item))
+    try? add(SwiftISYStatus(json: item))
   }
   
   /*
@@ -96,6 +114,15 @@ public class SwiftISYStatuses: SCOrderedSet<SwiftISYStatus>, SwiftISYHostKeyProt
     (addresses as! NSMutableOrderedSet).add(document.address)
   }
   
+  override open func willAdd(_ document: SwiftISYStatus, at i: Int) throws -> Bool {
+    return try registerNewDocument(document)
+  }
+  
+  override open func didAdd(_ document: SwiftISYStatus, at i: Int, success: Bool) {
+    guard success else { return }
+    (addresses as! NSMutableOrderedSet).insert(document.address, at: i)
+  }
+
   override open func willRemove(_ document: SwiftISYStatus) -> Bool {
     return true
   }
@@ -171,6 +198,10 @@ public class SwiftISYStatus: SCDocument, SwiftISYParserProtocol {
     value = UInt8(attributes[SwiftISY.Attributes.value] ?? "0") ?? 0
     if let formatted = attributes[SwiftISY.Attributes.formatted] { self.formatted = formatted }
     if let unitOfMeasure = attributes[SwiftISY.Attributes.unitsOfMeasure] { self.unitOfMeasure = unitOfMeasure }
+  }
+  
+  override open var description: String {
+    return String(describing: "\(String(describing: type(of: self)))(\"\(address)\")")
   }
   
   public func update(elementName: String, attributes: [String : String], text: String = "") {

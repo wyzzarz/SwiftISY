@@ -31,6 +31,10 @@ class SwiftCollectionOrderedSetTests: XCTestCase {
       self.name = name
     }
     
+    override var description: String {
+      return String(describing: "\(String(describing: type(of: self)))(\(id),\(name))")
+    }
+    
   }
   let docNone = NamedDocument(id: 0x0, name: "None")
   let docA = NamedDocument(id: 0x1, name: "A")
@@ -39,7 +43,7 @@ class SwiftCollectionOrderedSetTests: XCTestCase {
   let docD = NamedDocument(id: 0xFF, name: "D")
 
   // persisted sets
-  final class PersistedSet: SCOrderedSet<NamedDocument> {
+  class PersistedSet: SCOrderedSet<NamedDocument> {
     
     override func load(jsonObject json: AnyObject) throws -> AnyObject? {
       if let array = json as? [AnyObject] {
@@ -53,7 +57,29 @@ class SwiftCollectionOrderedSetTests: XCTestCase {
   }
   var set1 = PersistedSet()
   var set2 = PersistedSet()
-
+  
+  // sorted sets
+  class SortedSet: PersistedSet {
+    
+    let name = SCOrderedSet.Sort.SortId("name")!
+    let rname = SCOrderedSet.Sort.SortId("rname")!
+    
+    required init() {
+      super.init()
+      sorting.sortId = name
+      sorting.add(name) { (doc1, doc2) -> Bool in
+        return (doc1).name.compare((doc2).name) == .orderedAscending
+      }
+      sorting.add(rname) { (doc1, doc2) -> Bool in
+        return (doc2).name.compare((doc1).name) == .orderedAscending
+      }
+    }
+    
+    required init(json: AnyObject) throws {
+      try super.init(json: json)
+    }
+    
+  }
   
   // delegate sets
   final class DelegateSet: SCOrderedSet<NamedDocument> {
@@ -90,6 +116,14 @@ class SwiftCollectionOrderedSetTests: XCTestCase {
       return try super.willAppend(document)
     }
     override func didAppend(_ document: Document, success: Bool) {
+      didCount += 1
+      if success { successes += 1 } else { failures += 1 }
+    }
+    override func willAdd(_ document: Document, at i: Int) throws -> Bool {
+      willCount += 1
+      return try super.willAdd(document, at: i)
+    }
+    override func didAdd(_ document: Document, at i: Int, success: Bool) {
       didCount += 1
       if success { successes += 1 } else { failures += 1 }
     }
@@ -276,7 +310,24 @@ class SwiftCollectionOrderedSetTests: XCTestCase {
     XCTAssertEqual(set1[set1.index(set1.startIndex, offsetBy: 1)], docB)
     XCTAssertEqual(set1.last, docC)
   }
-  
+
+  func testAddReversedDocuments() {
+    let set = SortedSet()
+    
+    // sort by reversed name
+    set.sorting.sortId = set.rname
+    let c = set.sorting.comparator()
+    XCTAssertNotNil(c)
+    XCTAssertEqual(set.sorting.sortId, set.rname)
+    try! set.add(docC)
+    try! set.add(contentsOf: [docD, docA, docB])
+    XCTAssertEqual(set.count, 4)
+    XCTAssertEqual(set.first, docD)
+    XCTAssertEqual(set[set.index(set.startIndex, offsetBy: 1)], docC)
+    XCTAssertEqual(set[set.index(set.startIndex, offsetBy: 2)], docB)
+    XCTAssertEqual(set.last, docA)
+  }
+
   /*
    * -----------------------------------------------------------------------------------------------
    * MARK: - Remove
@@ -393,6 +444,100 @@ class SwiftCollectionOrderedSetTests: XCTestCase {
   
   /*
    * -----------------------------------------------------------------------------------------------
+   * MARK: - Sort
+   * -----------------------------------------------------------------------------------------------
+   */
+
+  func testSort() {
+    let set = PersistedSet()
+    let sorting = set.sorting
+
+    // test defaults
+    XCTAssertNil(sorting.sortId)
+    XCTAssertNil(sorting.comparator())
+    
+    // test default sort id
+    let name = SCOrderedSet.Sort.SortId("name")!
+    sorting.sortId = name
+    XCTAssertEqual(sorting.sortId, name)
+    
+    // test comparator
+    XCTAssertNil(sorting.comparator(name))
+    let c: (NamedDocument, NamedDocument) -> Bool = { (doc1, doc2) -> Bool in
+      return (doc1).name.compare((doc2).name) != .orderedDescending
+    }
+    sorting.add(name, comparator: c)
+    let comparator = sorting.comparator(name)
+    XCTAssertNotNil(comparator)
+    XCTAssertTrue(comparator!(docA, docB))
+    XCTAssertFalse(comparator!(docC, docB))
+    XCTAssertTrue(comparator!(docB, docB))
+    
+    // test default comparator
+    XCTAssertNotNil(sorting.comparator())
+    sorting.sortId = nil
+    XCTAssertNil(sorting.comparator())
+    
+    // test remove
+    let reversedName = SCOrderedSet.Sort.SortId("reversedName")!
+    sorting.add(reversedName) { (doc1, doc2) -> Bool in
+      return (doc2).name.compare((doc1).name) != .orderedDescending
+    }
+    XCTAssertNotNil(sorting.comparator(reversedName))
+    sorting.remove(reversedName)
+    XCTAssertNil(sorting.comparator(reversedName))
+    
+    // test remove all
+    sorting.removeAll()
+    XCTAssertNil(sorting.comparator(name))
+  }
+  
+  func testSortedAddDocument() {
+    let set = SortedSet()
+    let c = set.sorting.comparator()
+    XCTAssertNotNil(c)
+    XCTAssertEqual(set.sorting.sortId, set.name)
+    try! set.add(docD)
+    try! set.add(docC)
+    XCTAssertEqual(set.count, 2)
+    XCTAssertEqual(set.first, docC)
+    XCTAssertEqual(set.last, docD)
+  }
+  
+  func testSortedAddDocuments() {
+    let set = SortedSet()
+    let c = set.sorting.comparator()
+    XCTAssertNotNil(c)
+    XCTAssertEqual(set.sorting.sortId, set.name)
+    try! set.add(docC)
+    try! set.add(contentsOf: [docD, docA, docB])
+    XCTAssertEqual(set.count, 4)
+    XCTAssertEqual(set.first, docA)
+    XCTAssertEqual(set[set.index(set.startIndex, offsetBy: 1)], docB)
+    XCTAssertEqual(set[set.index(set.startIndex, offsetBy: 2)], docC)
+    XCTAssertEqual(set.last, docD)
+  }
+
+  func testChangeSort() {
+    // default sort by name
+    let set = SortedSet()
+    try! set.add(contentsOf: [docD, docC, docA, docB])
+    XCTAssertEqual(set.count, 4)
+    XCTAssertEqual(set.first, docA)
+    XCTAssertEqual(set[set.index(set.startIndex, offsetBy: 1)], docB)
+    XCTAssertEqual(set[set.index(set.startIndex, offsetBy: 2)], docC)
+    XCTAssertEqual(set.last, docD)
+    // sort by name, reversed
+    set.sorting.sortId = set.rname
+    XCTAssertEqual(set.count, 4)
+    XCTAssertEqual(set.first, docD)
+    XCTAssertEqual(set[set.index(set.startIndex, offsetBy: 1)], docC)
+    XCTAssertEqual(set[set.index(set.startIndex, offsetBy: 2)], docB)
+    XCTAssertEqual(set.last, docA)
+  }
+  
+  /*
+   * -----------------------------------------------------------------------------------------------
    * MARK: - Delegate
    * -----------------------------------------------------------------------------------------------
    */
@@ -423,7 +568,6 @@ class SwiftCollectionOrderedSetTests: XCTestCase {
     XCTAssertEqual(set.didCount, 4)
     XCTAssertEqual(set.successes, 3)
     XCTAssertEqual(set.failures, 1)
-    
   }
 
   func testAppendDelegate() {
@@ -454,6 +598,34 @@ class SwiftCollectionOrderedSetTests: XCTestCase {
     XCTAssertEqual(set.failures, 1)
   }
   
+  func testAddDelegate() {
+    let set = DelegateSet()
+    
+    try! set.add(docA)
+    XCTAssertEqual(set.willStartCount, 1)
+    XCTAssertEqual(set.didEndCount, 1)
+    XCTAssertEqual(set.willCount, 1)
+    XCTAssertEqual(set.didCount, 1)
+    XCTAssertEqual(set.successes, 1)
+    XCTAssertEqual(set.failures, 0)
+    
+    try! set.add(docA)
+    XCTAssertEqual(set.willStartCount, 2)
+    XCTAssertEqual(set.didEndCount, 2)
+    XCTAssertEqual(set.willCount, 2)
+    XCTAssertEqual(set.didCount, 2)
+    XCTAssertEqual(set.successes, 1)
+    XCTAssertEqual(set.failures, 1)
+    
+    try! set.add(contentsOf: [docB, docC])
+    XCTAssertEqual(set.willStartCount, 3)
+    XCTAssertEqual(set.didEndCount, 3)
+    XCTAssertEqual(set.willCount, 4)
+    XCTAssertEqual(set.didCount, 4)
+    XCTAssertEqual(set.successes, 3)
+    XCTAssertEqual(set.failures, 1)
+  }
+
   func testRemoveDelegate() {
     let set = DelegateSet()
 

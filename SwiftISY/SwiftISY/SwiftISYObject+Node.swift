@@ -21,6 +21,28 @@ import SwiftCollection
 
 public class SwiftISYNodes: SCOrderedSet<SwiftISYNode>, SwiftISYHostKeyProtocol, SwiftISYAddressesProtocol {
   
+  public struct SortId {
+    
+    public static let address = SwiftISYNodes.Sort.SortId("address")!
+    public static let name = SwiftISYNodes.Sort.SortId("name")!
+    
+  }
+  
+  public required init() {
+    super.init()
+    sorting.sortId = SortId.name
+    sorting.add(SortId.address) { (n1, n2) -> Bool in
+      return n1.address.compare(n2.address) == .orderedAscending
+    }
+    sorting.add(SortId.name) { (n1, n2) -> Bool in
+      return n1.name.compare(n2.name) == .orderedAscending
+    }
+  }
+  
+  public required init(json: AnyObject) throws {
+    try super.init(json: json)
+  }
+  
   override open func storageKey() -> String {
     guard let hostId = self.hostId else { return "" }
     guard hostId.isValid() else { return "" }
@@ -28,7 +50,7 @@ public class SwiftISYNodes: SCOrderedSet<SwiftISYNode>, SwiftISYHostKeyProtocol,
   }
   
   override open func load(arrayItem item: AnyObject, atIndex i: Int, json: AnyObject) {
-    try? append(SwiftISYNode(json: item))
+    try? add(SwiftISYNode(json: item))
   }
 
   /*
@@ -94,6 +116,15 @@ public class SwiftISYNodes: SCOrderedSet<SwiftISYNode>, SwiftISYHostKeyProtocol,
   override open func didAppend(_ document: SwiftISYNode, success: Bool) {
     guard success else { return }
     (addresses as! NSMutableOrderedSet).add(document.address)
+  }
+  
+  override open func willAdd(_ document: SwiftISYNode, at i: Int) throws -> Bool {
+    return try registerNewDocument(document)
+  }
+  
+  override open func didAdd(_ document: SwiftISYNode, at i: Int, success: Bool) {
+    guard success else { return }
+    (addresses as! NSMutableOrderedSet).insert(document.address, at: i)
   }
   
   override open func willRemove(_ document: SwiftISYNode) -> Bool {
@@ -166,6 +197,10 @@ public class SwiftISYNode: SCDocument, SwiftISYParserProtocol {
     if let address = attributes[SwiftISY.Attributes.id] { self.address = address }
   }
   
+  override open var description: String {
+    return String(describing: "\(String(describing: type(of: self)))(\"\(address)\":\"\(name)\")")
+  }
+
   public func update(elementName: String, attributes: [String : String], text: String = "") {
     switch elementName {
     case SwiftISY.Elements.address: address = text

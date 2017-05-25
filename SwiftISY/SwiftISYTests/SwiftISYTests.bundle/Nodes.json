@@ -19,7 +19,7 @@
   }, 
   {
     "_id": 1525177531, 
-    "address": "24 EF 96 1", 
+    "address": "44 EF 96 1", 
     "dcPeriod": 14, 
     "deviceClass": 13, 
     "elkId": "B05", 
@@ -30,7 +30,7 @@
     }, 
     "name": "Light 2", 
     "parent": "parent01", 
-    "pnode": "24 EF 96 1", 
+    "pnode": "44 EF 96 1", 
     "property": "property01", 
     "type": "2.44.65.0", 
     "wattage": 12

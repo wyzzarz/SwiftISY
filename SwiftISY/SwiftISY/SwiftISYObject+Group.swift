@@ -21,6 +21,28 @@ import SwiftCollection
 
 public class SwiftISYGroups: SCOrderedSet<SwiftISYGroup>, SwiftISYHostKeyProtocol, SwiftISYAddressesProtocol {
   
+  public struct SortId {
+    
+    public static let address = SwiftISYGroups.Sort.SortId("address")!
+    public static let name = SwiftISYGroups.Sort.SortId("name")!
+    
+  }
+  
+  public required init() {
+    super.init()
+    sorting.sortId = SortId.name
+    sorting.add(SortId.address) { (g1, g2) -> Bool in
+      return g1.address.compare(g2.address) == .orderedAscending
+    }
+    sorting.add(SortId.name) { (g1, g2) -> Bool in
+      return g1.name.compare(g2.name) == .orderedAscending
+    }
+  }
+  
+  public required init(json: AnyObject) throws {
+    try super.init(json: json)
+  }
+
   override open func storageKey() -> String {
     guard let hostId = self.hostId else { return "" }
     guard hostId.isValid() else { return "" }
@@ -28,7 +50,7 @@ public class SwiftISYGroups: SCOrderedSet<SwiftISYGroup>, SwiftISYHostKeyProtoco
   }
   
   override open func load(arrayItem item: AnyObject, atIndex i: Int, json: AnyObject) {
-    try? append(SwiftISYGroup(json: item))
+    try? add(SwiftISYGroup(json: item))
   }
   
   /*
@@ -96,6 +118,15 @@ public class SwiftISYGroups: SCOrderedSet<SwiftISYGroup>, SwiftISYHostKeyProtoco
     (addresses as! NSMutableOrderedSet).add(document.address)
   }
   
+  override open func willAdd(_ document: SwiftISYGroup, at i: Int) throws -> Bool {
+    return try registerNewDocument(document)
+  }
+  
+  override open func didAdd(_ document: SwiftISYGroup, at i: Int, success: Bool) {
+    guard success else { return }
+    (addresses as! NSMutableOrderedSet).insert(document.address, at: i)
+  }
+  
   override open func willRemove(_ document: SwiftISYGroup) -> Bool {
     return true
   }
@@ -150,7 +181,12 @@ public class SwiftISYGroup: SCDocument, SwiftISYParserProtocol {
   
   public required convenience init(elementName: String, attributes: [String: String]) {
     self.init()
-    flags = SwiftISY.NodeFlags(rawValue: UInt8(attributes[SwiftISY.Attributes.flag] ?? "0") ?? 0)  }
+    flags = SwiftISY.NodeFlags(rawValue: UInt8(attributes[SwiftISY.Attributes.flag] ?? "0") ?? 0)
+  }
+  
+  override open var description: String {
+    return String(describing: "\(String(describing: type(of: self)))(\"\(address)\":\"\(name)\")")
+  }
   
   public func update(elementName: String, attributes: [String : String], text: String = "") {
     switch elementName {

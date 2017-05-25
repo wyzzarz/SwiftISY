@@ -89,7 +89,7 @@ open class SCDocument: SCJsonObject {
    */
   
   override open var description: String {
-    return String(describing: "SCDocument(\(_id))")
+    return String(describing: "\(String(describing: type(of: self)))(\(_id))")
   }
 
   /*
