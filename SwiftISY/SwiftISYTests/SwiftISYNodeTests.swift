@@ -64,6 +64,7 @@ class SwiftISYNodeTests: XCTestCase {
     XCTAssertEqual(node?.parent, "parent01")
     XCTAssertEqual(node?.dcPeriod, 14)
     XCTAssertEqual(node?.flags.rawValue, 128)
+    XCTAssertEqual(node?.options.rawValue, 3)
 
     // save nodes
     try? _nodes.save(jsonStorage: .userDefaults, completion: nil)

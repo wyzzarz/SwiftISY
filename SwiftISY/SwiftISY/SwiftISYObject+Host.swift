@@ -52,6 +52,18 @@ public class SwiftISYHosts: SCOrderedSet<SwiftISYHost> {
     return json
   }
   
+  /// Returns an existing host from the collection if it matches this host.  Otherwise returns
+  /// the supplied host.
+  ///
+  /// - Parameter host: Host to be located.
+  /// - Returns: Existing host from collection; or provided host if not found.
+  public func existing(_ host: SwiftISYHost) -> SwiftISYHost {
+    for h in self {
+      if h.host == host.host && h.user == host.user { return h }
+    }
+    return host
+  }
+  
 }
 
 public class SwiftISYHost: SCDocument {

@@ -61,6 +61,7 @@ class SwiftISYRequestTests: XCTestCase {
       XCTAssertEqual(node!.dcPeriod, 3)
       XCTAssertEqual(node!.pnode, node!.address)
       XCTAssertEqual(node!.elkId, "C02")
+      XCTAssertEqual(node!.options.rawValue, SwiftISY.OptionFlags(other: [.light, .dimmable]).rawValue)
       
       // test status
       XCTAssertEqual(objects.statuses.count, 4)
@@ -135,7 +136,7 @@ class SwiftISYRequestTests: XCTestCase {
   }
 
   func testResponseRequest() {
-    let e = expectation(description: Paths.response)
+    let e = expectation(description: Paths.on)
     
     SwiftISYRequest(host).on(address: "24 DD AD 1") { (result) in
       e.fulfill()

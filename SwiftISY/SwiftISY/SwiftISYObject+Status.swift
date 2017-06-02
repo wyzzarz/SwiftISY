@@ -49,6 +49,12 @@ public class SwiftISYStatuses: SCOrderedSet<SwiftISYStatus>, SwiftISYHostKeyProt
     try? add(SwiftISYStatus(json: item))
   }
   
+  public func index(of element: SwiftISYStatus) -> SCOrderedSetIndex<SwiftISYStatus>? {
+    let (i, _) = existingDocument(element)
+    if i == NSNotFound { return super.index(of: element) }
+    return index(startIndex, offsetBy: i)
+  }
+  
   /*
    * -----------------------------------------------------------------------------------------------
    * MARK: - SwiftISYAddressesProtocol

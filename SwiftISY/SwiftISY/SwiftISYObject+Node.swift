@@ -189,8 +189,21 @@ public class SwiftISYNode: SCDocument, SwiftISYParserProtocol {
   
   public var elkId = ""
   
+  /// Properties for this node.  Such as status of a light switch.
   public var property = ""
   
+  /// Options describing this node.
+  public var options: SwiftISY.OptionFlags = SwiftISY.OptionFlags(rawValue: 0)
+  
+  /// Returns `true` if this node controls a light; `false` otherwise.
+  public var isLight: Bool { return options.contains(.light) }
+
+  /// Returns `true` if this node controls a light switch; `false` otherwise.
+  public var isOnOff: Bool { return options.contains(.onOff) }
+
+  /// Returns `true` if this node controls a dimmable light; `false` otherwise.
+  public var isDimmable: Bool { return options.contains(.dimmable) }
+
   public required convenience init(elementName: String, attributes: [String: String]) {
     self.init()
     if let flags = attributes[SwiftISY.Attributes.flag] { self.flags = SwiftISY.NodeFlags(rawValue: UInt8(flags) ?? 0) }
@@ -246,6 +259,10 @@ public class SwiftISYNode: SCDocument, SwiftISYParserProtocol {
     case Keys.pnode: pnode = value as? String ?? ""
     case Keys.elkId: elkId = value as? String ?? ""
     case Keys.property: property = value as? String ?? ""
+    case Keys.options:
+      if let optionsDict = value as? [String: NSNumber] {
+        options = SwiftISY.OptionFlags(rawValue: optionsDict["rawValue"]?.uint8Value ?? 0)
+      }
     default: break
     }
   }
@@ -267,5 +284,6 @@ extension SwiftISYNode.Keys {
   public static let pnode = "pnode"
   public static let elkId = "elkId"
   public static let property = "property"
+  public static let options = "options"
   
 }

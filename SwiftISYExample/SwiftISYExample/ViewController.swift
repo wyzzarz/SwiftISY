@@ -72,4 +72,10 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     return cell!
   }
   
+  func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    tableView.deselectRow(at: indexPath, animated: true)
+    let node = nodes[indexPath.row]
+    print("Address: \(node.address)")
+  }
+  
 }

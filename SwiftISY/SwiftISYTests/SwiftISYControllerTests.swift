@@ -38,8 +38,8 @@ class SwiftISYControllerLoadTests: XCTestCase {
     
     // load hosts from test bundle
     let hosts = testLoadHosts()
-    _host1 = hosts?.first
-    _host2 = hosts?.last
+    _host1 = hosts!.first
+    _host2 = hosts!.last
 
     // load objects for host 2
     testLoadNodes(_host2!)
@@ -86,15 +86,15 @@ class SwiftISYControllerLoadTests: XCTestCase {
 
       let nodes = self._controller.nodes(self._host2!)
       XCTAssertEqual(nodes.count, 4)
-      XCTAssertEqual(nodes.document(address: "24 DD AD 1")?.name, "Light 1 (R)")
+      XCTAssertEqual(nodes.document(address: "24 DD AD 1")!.name, "Light 1 (R)")
 
       let groups = self._controller.groups(self._host2!)
       XCTAssertEqual(groups.count, 2)
-      XCTAssertEqual(groups.document(address: "00:21:b9:02:03:89")?.name, "Scene 1 (R)")
+      XCTAssertEqual(groups.document(address: "00:21:b9:02:03:89")!.name, "Scene 1 (R)")
 
       let statuses = self._controller.statuses(self._host2!)
       XCTAssertEqual(statuses.count, 4)
-      XCTAssertEqual(statuses.document(address: "24 EF 96 4")?.value, 255)
+      XCTAssertEqual(statuses.document(address: "24 EF 96 4")!.value, 255)
     }
 
     XCTAssertEqual(_controller.hosts.count, 3)
@@ -104,15 +104,15 @@ class SwiftISYControllerLoadTests: XCTestCase {
     
     let nodes = _controller.nodes(_host2!)
     XCTAssertEqual(nodes.count, 4)
-    XCTAssertEqual(nodes.document(address: "24 DD AD 1")?.name, "Light 1")
+    XCTAssertEqual(nodes.document(address: "24 DD AD 1")!.name, "Light 1")
     
     let groups = _controller.groups(_host2!)
     XCTAssertEqual(groups.count, 4)
-    XCTAssertEqual(groups.document(address: "00:21:b9:02:03:89")?.name, "Scene 1")
+    XCTAssertEqual(groups.document(address: "00:21:b9:02:03:89")!.name, "Scene 1")
     
     let statuses = _controller.statuses(_host2!)
     XCTAssertEqual(statuses.count, 4)
-    XCTAssertEqual(statuses.document(address: "24 EF 96 4")?.value, 0)
+    XCTAssertEqual(statuses.document(address: "24 EF 96 4")!.value, 0)
 
     waitForExpectations(timeout: 60) { (error) in
       guard error == nil else { XCTFail(error!.localizedDescription); return }
@@ -137,8 +137,8 @@ class SwiftISYControllerRefreshTests: XCTestCase {
     
     // load hosts from test bundle
     let hosts = testLoadHosts()
-    invalidHost = hosts?.document(withId: invalidHostId)
-    validHost = hosts?.document(withId: validHostId)
+    invalidHost = hosts!.document(withId: invalidHostId)
+    validHost = hosts!.document(withId: validHostId)
     
     // handle requests
     setupUrlSessionTest(validHost)
@@ -179,5 +179,102 @@ class SwiftISYControllerRefreshTests: XCTestCase {
     }
 
   }
+  
+}
+
+// -------------------------------------------------------------------------------------------------
+// MARK: -
+// -------------------------------------------------------------------------------------------------
+
+class SwiftISYControllerCommandTests: XCTestCase {
+  
+  var _node: SwiftISYNode?
+  var _host: SwiftISYHost?
+  let _controller = SwiftISYController(refresh: false)
+  
+  override func setUp() {
+    super.setUp()
+    
+    // set defaults
+    _controller.storage = .userDefaults
+    
+    // load hosts from test bundle
+    let hosts = testLoadHosts()
+    _host = hosts!.last
+    
+    // load objects for host
+    testLoadNodes(_host!)
+    testLoadGroups(_host!)
+    testLoadStatuses(_host!)
+    
+    // handle requests
+    setupUrlSessionTest(_host)
+
+    // load controller
+    _controller.reload(refresh: false)
+    _node = _controller.nodes(_host!).document(address: "24 DD AD 1")
+
+  }
+  
+  override func tearDown() {
+    // unhandle requests
+    self.tearDownUrlSessionTest()
+    
+    // remove objects
+    testRemoveHosts()
+    testRemoveNodes(_host!)
+    testRemoveGroups(_host!)
+    testRemoveStatuses(_host!)
+    
+    super.tearDown()
+  }
+  
+  func testOptions() {
+    var lightCount = 0
+    var dimmableCount = 0
+    let nodes = _controller.nodes(_host!)
+    for node in nodes {
+      if node.isLight { lightCount += 1 }
+      if node.isDimmable { dimmableCount += 1 }
+    }
+    XCTAssertEqual(lightCount, 4)
+    XCTAssertEqual(dimmableCount, 1)
+  }
+  
+  func testDeviceOff() {
+    // validate notification after turning node off
+    _ = expectation(forNotification: NSNotification.Name.needsRefresh.rawValue, object: nil, handler: { (n) -> Bool in
+      guard let userInfo = n.userInfo else { return false }
+      guard let address = userInfo[SwiftISY.Elements.address] as? String else { return false }
+      XCTAssertEqual(address, self._node!.address)
+      return address == self._node!.address
+    })
+    
+    // confirm status updated for node
+    _ = expectation(forNotification: NSNotification.Name.didRefresh.rawValue, object: nil, handler: { (n) -> Bool in
+      guard let userInfo = n.userInfo else { return false }
+      guard let address = userInfo[SwiftISY.Elements.address] as? String else { return false }
+      XCTAssertEqual(address, self._node!.address)
+      let status = self._controller.status(self._host!, address: self._node!.address).values.first
+      XCTAssertEqual(status!.value, 0)
+      return address == self._node!.address
+    })
+    
+    // validate node
+    XCTAssertNotNil(_host)
+    XCTAssertNotNil(_node)
+    let status = _controller.status(_host!, address: _node!.address).values.first
+    XCTAssertEqual(status!.value, 75)
+    
+    // turn node off
+    _controller.request(_host!).off(address: _node!.address) { (result) in
+      XCTAssertTrue(result.success)
+      XCTAssertEqual(result.objects!.responses.count, 1)
+    }
+    
+    waitForExpectations(timeout: 60) { (error) in
+      guard error == nil else { XCTFail(error!.localizedDescription); return }
+    }
+ }
   
 }

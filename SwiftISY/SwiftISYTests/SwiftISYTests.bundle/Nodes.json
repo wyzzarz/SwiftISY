@@ -11,6 +11,9 @@
       "rawValue": 128
     }, 
     "name": "Light 1", 
+    "options": {
+      "rawValue": 5
+    }, 
     "parent": "", 
     "pnode": "24 DD AD 1", 
     "property": "", 
@@ -29,6 +32,9 @@
       "rawValue": 128
     }, 
     "name": "Light 2", 
+    "options": {
+      "rawValue": 3
+    }, 
     "parent": "parent01", 
     "pnode": "44 EF 96 1", 
     "property": "property01", 
@@ -47,6 +53,9 @@
       "rawValue": 0
     }, 
     "name": "Light 3", 
+    "options": {
+      "rawValue": 3
+    }, 
     "parent": "", 
     "pnode": "24 EF 96 1", 
     "property": "", 
@@ -65,6 +74,9 @@
       "rawValue": 0
     }, 
     "name": "Switch 1", 
+    "options": {
+      "rawValue": 3
+    }, 
     "parent": "", 
     "pnode": "24 EF 96 1", 
     "property": "", 

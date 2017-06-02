@@ -123,6 +123,14 @@ public struct SwiftISYRequest {
 
 extension SwiftISYRequest {
   
+  /// Returns an encoded address to be used in a URL.
+  ///
+  /// - Parameter address: The address to be encoded.
+  /// - Returns: The encoded address.
+  public static func encodedAddress(_ address: String) -> String {
+    return address.addingPercentEncoding(withAllowedCharacters:.urlHostAllowed)!
+  }
+  
   private func makeRequest(command: String) -> (URLRequest?, SwiftISY.RequestError?) {
     // ensure there is a command
     if command.characters.count == 0 { return (nil, SwiftISY.RequestError(kind: .invalidCommand)) }
@@ -149,19 +157,19 @@ extension SwiftISYRequest {
     return (request, nil)
   }
   
-  private func parseResponse(data: Data, response: HTTPURLResponse, completion: @escaping Completion) {
-    _ = SwiftISYParser(data: data).parse() { (objects) in
+  private func parseResponse(data: Data, response: HTTPURLResponse, userInfo: SwiftISY.UserInfo, completion: @escaping Completion) {
+    _ = SwiftISYParser(data: data, userInfo: userInfo).parse() { (objects) in
       DispatchQueue.main.async {
         completion(Result(success: true, error: nil, objects: objects))
       }
     }
   }
   
-  private func handleResponse(data: Data?, response: HTTPURLResponse, completion: @escaping Completion) {
+  private func handleResponse(data: Data?, response: HTTPURLResponse, userInfo: SwiftISY.UserInfo, completion: @escaping Completion) {
     // handle successful request
     if let statusCode = SwiftISY.HttpStatusCodes(rawValue: response.statusCode) {
       if statusCode.isSuccessful && data != nil {
-        parseResponse(data: data!, response: response, completion: completion)
+        parseResponse(data: data!, response: response, userInfo: userInfo, completion: completion)
         return
       }
     }
@@ -182,7 +190,7 @@ extension SwiftISYRequest {
     }
   }
 
-  fileprivate func executeRest(command: String, completion: @escaping Completion) {
+  fileprivate func executeRest(command: String, userInfo: SwiftISY.UserInfo = [:], completion: @escaping Completion) {
     // build request for rest command and include authorization
     let (request, error) = makeRequest(command: command)
     if error != nil {
@@ -197,7 +205,7 @@ extension SwiftISYRequest {
         return
       }
       let httpResponse = response as? HTTPURLResponse?
-      self.handleResponse(data: data, response: httpResponse!!, completion: completion)
+      self.handleResponse(data: data, response: httpResponse!!, userInfo: userInfo, completion: completion)
       }.resume()
   }
 
@@ -215,7 +223,20 @@ extension SwiftISYRequest {
   /// - Parameter completion: The closure to execute once the network request has completed.
   ///
   public func nodes(completion: @escaping Completion) {
-    executeRest(command: "rest/nodes", completion: completion)
+    executeRest(command: "rest/nodes") { (result) in
+      defer {
+        completion(result)
+      }
+      // apply status from property to node
+      guard result.success else { return }
+      guard let objects = result.objects else { return }
+      let statuses = objects.statuses
+      for node in objects.nodes {
+        if let status = statuses[node.address] {
+          node.options = SwiftISY.OptionFlags(string: status.unitOfMeasure)
+        }
+      }
+    }
   }
   
   ///
@@ -227,6 +248,17 @@ extension SwiftISYRequest {
     executeRest(command: "rest/status", completion: completion)
   }
   
+  ///
+  /// Gets status for the specified node.
+  ///
+  /// - Parameters:
+  ///   - address: Address for the node.
+  ///   - completion: The closure to execute once the network request has completed.
+  public func status(address: String, completion: @escaping Completion) {
+    let encodedAddress = SwiftISYRequest.encodedAddress(address)
+    executeRest(command: "rest/nodes/\(encodedAddress)/ST", userInfo: [SwiftISY.Elements.address: address], completion: completion)
+  }
+
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -238,33 +270,70 @@ extension SwiftISYRequest {
   ///
   /// Executes a command for the specified node on the host.
   ///
-  /// - Parameter address: Address for the node/group.
-  /// - Parameter command: Command to be issued for the node.
-  /// - Parameter completion: The closure to execute once the network request has completed.
+  /// - Parameters:
+  ///   - address: Address for the node/group.
+  ///   - command: Command to be issued for the node.
+  ///   - completion: The closure to execute once the network request has completed.
   ///
   fileprivate func deviceCommand(address: String, command: String, completion: @escaping Completion) {
-    let encodedAddress = address.addingPercentEncoding(withAllowedCharacters:.urlHostAllowed)!
-    executeRest(command: "rest/nodes/\(encodedAddress)/cmd/\(command)", completion: completion)
+    let encodedAddress = SwiftISYRequest.encodedAddress(address)
+    executeRest(command: "rest/nodes/\(encodedAddress)/cmd/\(command)") { (result) in
+      DispatchQueue.main.async {
+        NotificationCenter.default.post(name: .needsRefresh, object: self.host, userInfo: [SwiftISY.Elements.address: address])
+      }
+      completion(result)
+    }
   }
   
   ///
   /// Turns the specifed node on.
   ///
-  /// - Parameter address: Address for the node/group.
-  /// - Parameter completion: The closure to execute once the network request has completed.
-  ///
-  public func on(address: String, completion: @escaping Completion) {
-    deviceCommand(address: address, command: "DON", completion: completion)
+  /// - Parameters:
+  ///   - address: Address for the node/group.
+  ///   - fast: `true` if the device is to be turned on fast; `false` otherwise.  Default is
+  ///     `false`.
+  ///   - brightness: Sets the brightness level for a dimmable light from 0.0 (0%) to 1.0 (100%).
+  ///   - completion: The closure to execute once the network request has completed.
+  public func on(address: String, fast: Bool = false, brightness: Double = 1.0, completion: @escaping Completion) {
+    var command = fast ? "DFON" : "DON"
+    let brightness = min(1.0, max(0.0, brightness))
+    if brightness < 1.0 { command += "/\(Int(round(brightness * 255)))" }
+    deviceCommand(address: address, command: command, completion: completion)
   }
 
   ///
   /// Turns the specifed node off.
   ///
-  /// - Parameter address: Address for the node/group.
-  /// - Parameter completion: The closure to execute once the network request has completed.
+  /// - Parameters:
+  ///   - address: Address for the node/group.
+  ///   - fast: `true` if the device is to be turned off fast; `false` otherwise.  Default is
+  ///     `false`.
+  ///   - completion: The closure to execute once the network request has completed.
   ///
-  public func off(address: String, completion: @escaping Completion) {
-    deviceCommand(address: address, command: "DOF", completion: completion)
+  public func off(address: String, fast: Bool = false, completion: @escaping Completion) {
+    deviceCommand(address: address, command: fast ? "DFOF" : "DOF", completion: completion)
+  }
+
+  ///
+  /// Brightens the specifed node by ~3%.
+  ///
+  /// - Parameters:
+  ///   - address: Address for the node/group.
+  ///   - completion: The closure to execute once the network request has completed.
+  ///
+  public func brighten(address: String, completion: @escaping Completion) {
+    deviceCommand(address: address, command: "BRT", completion: completion)
+  }
+
+  ///
+  /// Dims the specifed node by ~3%.
+  ///
+  /// - Parameters:
+  ///   - address: Address for the node/group.
+  ///   - completion: The closure to execute once the network request has completed.
+  ///
+  public func dim(address: String, completion: @escaping Completion) {
+    deviceCommand(address: address, command: "DIM", completion: completion)
   }
 
 }

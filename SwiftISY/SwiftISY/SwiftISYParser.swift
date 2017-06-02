@@ -25,6 +25,7 @@ internal class SwiftISYParser: NSObject {
   
   // XML
   var parser: XMLParser
+  var userInfo: SwiftISY.UserInfo
   var completion: ((_ objects: SwiftISYRequest.Objects) -> Void)?
   var texts: [String] = []
   var attributes: [[String: String]] = []
@@ -43,13 +44,17 @@ internal class SwiftISYParser: NSObject {
 
   // Status
   var currentStatus: SwiftISYStatus?
+
+  // Properties
+  var isProcessingProperties = false
   
   // Response
   var isProcessingResponse = false
   var currentResponse: SwiftISYResponse?
   
-  init(data: Data) {
+  init(data: Data, userInfo: SwiftISY.UserInfo) {
     parser = XMLParser(data: data)
+    self.userInfo = userInfo
     super.init()
     parser.delegate = self
   }
@@ -72,27 +77,36 @@ extension SwiftISYParser: XMLParserDelegate {
     if completion != nil { completion!(objects) }
   }
 
-  func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
+  func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributesDict: [String : String] = [:]) {
     // hold text for this element
     texts.append("")
     
     // hold attributes for this element
-    attributes.append(attributeDict)
+    attributes.append(attributesDict)
     
     // process this element
     if elementName == SwiftISY.Elements.group {
       // handle group
-      currentGroup = SwiftISYGroup(elementName: elementName, attributes: attributeDict)
+      currentGroup = SwiftISYGroup(elementName: elementName, attributes: attributesDict)
       objects.groups.append(currentGroup!)
       isProcessingGroup = true
     } else if elementName == SwiftISY.Elements.node {
       // handle node
-      currentNode = SwiftISYNode(elementName: elementName, attributes: attributeDict)
+      currentNode = SwiftISYNode(elementName: elementName, attributes: attributesDict)
       objects.nodes.append(currentNode!)
       isProcessingNode = true
+    } else if elementName == SwiftISY.Elements.properties {
+      // handle properties
+      isProcessingProperties = true
+    } else if isProcessingProperties && elementName == SwiftISY.Elements.property {
+      // handle property
+      if SwiftISYStatus.canHandle(elementName: elementName, attributes: attributesDict) {
+        // handle status
+        currentStatus = SwiftISYStatus(elementName: elementName, attributes: attributesDict)
+      }
     } else if elementName == SwiftISY.Elements.restResponse {
       // handle rest response
-      currentResponse = SwiftISYResponse(elementName: elementName, attributes: attributeDict)
+      currentResponse = SwiftISYResponse(elementName: elementName, attributes: attributesDict)
       objects.responses.append(currentResponse!)
       isProcessingResponse = true
     }
@@ -133,6 +147,10 @@ extension SwiftISYParser: XMLParserDelegate {
       // process rest response
       currentResponse = nil
       isProcessingResponse = false
+    } else if elementName == SwiftISY.Elements.properties {
+      // process properties
+      currentStatus = nil
+      isProcessingProperties = false
     } else if isProcessingGroup {
       // handle group properties
       guard let group = currentGroup else { return }
@@ -144,6 +162,16 @@ extension SwiftISYParser: XMLParserDelegate {
       } else {
         guard let node = currentNode else { return }
         node.update(elementName: elementName, attributes: attributesDict, text: text)
+      }
+    } else if isProcessingProperties {
+      // handle property
+      if elementName == SwiftISY.Elements.property && SwiftISYStatus.canHandle(elementName: elementName, attributes: attributesDict) {
+        if let status = currentStatus {
+          if let address = userInfo[SwiftISY.Elements.address] {
+            status.address = address
+            objects.statuses[address] = status
+          }
+        }
       }
     } else if isProcessingResponse {
       // handle rest response

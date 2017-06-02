@@ -38,7 +38,9 @@ extension XCTestCase {
     
     static let nodes = "/rest/nodes"
     static let statuses = "/rest/status"
-    static let response = "/rest/nodes/24 DD AD 1/cmd/DON"
+    static let on = "/rest/nodes/24 DD AD 1/cmd/DON"
+    static let off = "/rest/nodes/24 DD AD 1/cmd/DOF"
+    static let status = "/rest/nodes/24 DD AD 1/ST"
     
   }
   
@@ -68,11 +70,16 @@ extension XCTestCase {
         switch path {
         case Paths.nodes:
           data = self.testResourceData(forResource: "Nodes", withExtension: "xml")
+        case Paths.status:
+          data = self.testResourceData(forResource: "Status", withExtension: "xml")
         case Paths.statuses:
           data = self.testResourceData(forResource: "Statuses", withExtension: "xml")
-        case Paths.response:
+        case Paths.on:
+          data = self.testResourceData(forResource: "Response", withExtension: "xml")
+        case Paths.off:
           data = self.testResourceData(forResource: "Response", withExtension: "xml")
         default:
+          assertionFailure("Unknown Path: \(path)")
           break
         }
       }
@@ -182,4 +189,26 @@ extension XCTestCase {
     try? SwiftISYStatuses(hostId: host.id).remove(jsonStorage: .userDefaults, completion: nil)
   }
 
+}
+
+// -------------------------------------------------------------------------------------------------
+// MARK: - 
+// -------------------------------------------------------------------------------------------------
+
+class SwiftISYTests: XCTestCase {
+  
+  func testOnOffOptionFlags() {
+    let of = SwiftISY.OptionFlags(string: SwiftISY.UnitOfMeasure.onOff)
+    XCTAssertTrue(of.contains(.light))
+    XCTAssertTrue(of.contains(.onOff))
+    XCTAssertFalse(of.contains(.dimmable))
+  }
+  
+  func testDimmableOptionFlags() {
+    let of = SwiftISY.OptionFlags(string: SwiftISY.UnitOfMeasure.dimmable)
+    XCTAssertTrue(of.contains(.light))
+    XCTAssertFalse(of.contains(.onOff))
+    XCTAssertTrue(of.contains(.dimmable))
+  }
+  
 }

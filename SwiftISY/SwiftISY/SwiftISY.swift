@@ -25,6 +25,8 @@ import Foundation
 
 public struct SwiftISY {
   
+  typealias UserInfo = [String: String]
+  
   /// Bundle Id for this framework.
   public static let bundleId = "com.wyz.SwiftISY"
   
@@ -41,13 +43,13 @@ public struct SwiftISY {
   ///
   public struct Attributes {
     
-    static let flag = "flag"
-    static let formatted = "formatted"
-    static let id = "id"
-    static let succeeded = "succeeded"
-    static let type = "type"
-    static let unitsOfMeasure = "uom"
-    static let value = "value"
+    public static let flag = "flag"
+    public static let formatted = "formatted"
+    public static let id = "id"
+    public static let succeeded = "succeeded"
+    public static let type = "type"
+    public static let unitsOfMeasure = "uom"
+    public static let value = "value"
     
   }
 
@@ -56,27 +58,28 @@ public struct SwiftISY {
   ///
   public struct Elements {
     
-    static let address = "address"
-    static let controllerIds = "controllerIds"
-    static let dcPeriod = "dcPeriod"
-    static let deviceClass = "deviceClass"
-    static let deviceGroup = "deviceGroup"
-    static let elkId = "ELK_ID"
-    static let enabled = "enabled"
-    static let family = "family"
-    static let group = "group"
-    static let link = "link"
-    static let name = "name"
-    static let nodes = "nodes"
-    static let node = "node"
-    static let parent = "parent"
-    static let pnode = "pnode"
-    static let property = "property"
-    static let responderIds = "responderIds"
-    static let restResponse = "RestResponse"
-    static let status = "status"
-    static let type = "type"
-    static let wattage = "wattage"
+    public static let address = "address"
+    public static let controllerIds = "controllerIds"
+    public static let dcPeriod = "dcPeriod"
+    public static let deviceClass = "deviceClass"
+    public static let deviceGroup = "deviceGroup"
+    public static let elkId = "ELK_ID"
+    public static let enabled = "enabled"
+    public static let family = "family"
+    public static let group = "group"
+    public static let link = "link"
+    public static let name = "name"
+    public static let nodes = "nodes"
+    public static let node = "node"
+    public static let parent = "parent"
+    public static let pnode = "pnode"
+    public static let properties = "properties"
+    public static let property = "property"
+    public static let responderIds = "responderIds"
+    public static let restResponse = "RestResponse"
+    public static let status = "status"
+    public static let type = "type"
+    public static let wattage = "wattage"
     
   }
   
@@ -85,7 +88,7 @@ public struct SwiftISY {
   ///
   public struct PropertyTypes {
     
-    static let status = "ST"
+    public static let status = "ST"
     
   }
 
@@ -260,20 +263,61 @@ public struct SwiftISY {
     
     public let rawValue: UInt8
     
-    public static let none         = NodeFlags(rawValue: 0x00)
-    public static let isInit       = NodeFlags(rawValue: 0x01)  // Needs to be initialized
-    public static let toScan       = NodeFlags(rawValue: 0x02)  // Needs to be scanned
-    public static let isGroup      = NodeFlags(rawValue: 0x04)  // It’s a group!
-    public static let isRoot       = NodeFlags(rawValue: 0x08)  // It’s the root group
-    public static let isError      = NodeFlags(rawValue: 0x10)  // It’s in error!
-    public static let isNew        = NodeFlags(rawValue: 0x20)  // Brand new node
-    public static let toDelete     = NodeFlags(rawValue: 0x40)  // Has to be deleted later
-    public static let isDeviceRoot = NodeFlags(rawValue: 0x80)  // Root device such as KPL load
+    public static let none         = NodeFlags(rawValue: 0 << 0)
+    public static let isInit       = NodeFlags(rawValue: 1 << 0)  // Needs to be initialized
+    public static let toScan       = NodeFlags(rawValue: 1 << 1)  // Needs to be scanned
+    public static let isGroup      = NodeFlags(rawValue: 1 << 2)  // It’s a group!
+    public static let isRoot       = NodeFlags(rawValue: 1 << 3)  // It’s the root group
+    public static let isError      = NodeFlags(rawValue: 1 << 4)  // It’s in error!
+    public static let isNew        = NodeFlags(rawValue: 1 << 5)  // Brand new node
+    public static let toDelete     = NodeFlags(rawValue: 1 << 6)  // Has to be deleted later
+    public static let isDeviceRoot = NodeFlags(rawValue: 1 << 7)  // Root device such as KPL load
     
     public init(rawValue: UInt8) {
       self.rawValue = rawValue
     }
     
+  }
+  
+  ///
+  /// Values for unit of measure.
+  ///
+  public struct UnitOfMeasure {
+    
+    public static let onOff = "on/off"
+    public static let dimmable = "%/on/off"
+    
+  }
+
+  ///
+  /// Options for a device.
+  ///
+  public struct OptionFlags: OptionSet {
+    
+    public let rawValue: UInt8
+    
+    public static let light        = OptionFlags(rawValue: 1 << 0)  // Whether the device is a light
+    public static let onOff        = OptionFlags(rawValue: 1 << 1)  // Whether the device can be switched on/off
+    public static let dimmable     = OptionFlags(rawValue: 1 << 2)  // Whether the device is dimmable
+
+    public init(rawValue: UInt8) {
+      self.rawValue = rawValue
+    }
+
+    public init(other: OptionFlags) {
+      self.rawValue = other.rawValue
+    }
+    
+    public init(string: String) {
+      var of = OptionFlags()
+      switch(string) {
+      case UnitOfMeasure.onOff: of.formUnion([OptionFlags.light, OptionFlags.onOff])
+      case UnitOfMeasure.dimmable: of.formUnion([OptionFlags.light, OptionFlags.dimmable])
+      default: break
+      }
+      self.rawValue = of.rawValue
+    }
+
   }
   
 }
@@ -466,4 +510,10 @@ extension Notification.Name {
   /// Sent when the application returns from the background and is active.
   public static let onResume = Notification.Name("\(SwiftISY.bundleId).onResume")
   
+  /// Sent when the status of a device needs to be refreshed.
+  public static let needsRefresh = Notification.Name("\(SwiftISY.bundleId).needsRefresh")
+
+  /// Sent when the status of a device was refreshed.
+  public static let didRefresh = Notification.Name("\(SwiftISY.bundleId).didRefresh")
+
 }
