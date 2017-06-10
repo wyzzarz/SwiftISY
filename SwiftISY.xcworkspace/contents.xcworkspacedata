@@ -2,9 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:../SwiftISY/SwiftISY.xcodeproj">
+      location = "group:SwiftISY/SwiftISY.xcodeproj">
    </FileRef>
    <FileRef
-      location = "container:SwiftISYExample.xcodeproj">
+      location = "group:SwiftISYExample/SwiftISYExample.xcodeproj">
    </FileRef>
 </Workspace>
