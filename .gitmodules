@@ -1,0 +1,3 @@
+[submodule "Carthage/Checkouts/SwiftCollection"]
+	path = Carthage/Checkouts/SwiftCollection
+	url = https://github.com/wyzzarz/SwiftCollection.git
