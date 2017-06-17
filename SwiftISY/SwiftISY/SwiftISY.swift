@@ -509,25 +509,20 @@ extension SwiftISY {
   
   public enum Notifications: String {
     
+    /// Sent when the application returns from the background and is active.
     case onResume = "onResume"
-    
+   
+    /// Sent when the status of a device needs to be refreshed.
     case needsRefresh = "needsRefresh"
     
+    /// Sent when the status of a device was refreshed.
     case didRefresh = "didRefresh"
     
+    /// Returns a `Notification.Name` for this enumeration value.
     public var notification : Notification.Name  {
       return Notification.Name(rawValue: "\(SwiftISY.bundleId).\(self.rawValue)" )
     }
     
   }
-  
-//  /// Sent when the application returns from the background and is active.
-//  public static let onResume = Notification.Name("\(SwiftISY.bundleId).onResume")
-//  
-//  /// Sent when the status of a device needs to be refreshed.
-//  public static let needsRefresh = Notification.Name("\(SwiftISY.bundleId).needsRefresh")
-//
-//  /// Sent when the status of a device was refreshed.
-//  public static let didRefresh = Notification.Name("\(SwiftISY.bundleId).didRefresh")
 
 }
