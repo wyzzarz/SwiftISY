@@ -457,7 +457,7 @@ public class SwiftISYController {
   @objc public func onResume() {
     DispatchQueue.main.async {
       self.refresh { (success) in
-        NotificationCenter.default.post(name: .onResume, object: nil)
+        NotificationCenter.default.post(name: SwiftISY.Notifications.onResume.notification, object: nil)
       }
     }
   }
@@ -488,7 +488,7 @@ public class SwiftISYController {
       self.refresh(host, address: address, completion: { (controller, success) in
         if success {
           let nc = NotificationCenter.default
-          nc.post(name: .didRefresh, object: host, userInfo: userInfo)
+          nc.post(name: SwiftISY.Notifications.didRefresh.notification, object: host, userInfo: userInfo)
         }
       })
     }
@@ -496,7 +496,7 @@ public class SwiftISYController {
   
   fileprivate func handleNotifications() {
     let nc = NotificationCenter.default
-    nc.addObserver(self, selector: #selector(needsRefresh(n:)), name: .needsRefresh, object: nil)
+    nc.addObserver(self, selector: #selector(needsRefresh(n:)), name: SwiftISY.Notifications.needsRefresh.notification, object: nil)
   }
   
 }

@@ -505,15 +505,29 @@ extension SwiftISY {
 // MARK: - Notifications
 // -------------------------------------------------------------------------------------------------
 
-extension Notification.Name {
+extension SwiftISY {
   
-  /// Sent when the application returns from the background and is active.
-  public static let onResume = Notification.Name("\(SwiftISY.bundleId).onResume")
+  public enum Notifications: String {
+    
+    case onResume = "onResume"
+    
+    case needsRefresh = "needsRefresh"
+    
+    case didRefresh = "didRefresh"
+    
+    public var notification : Notification.Name  {
+      return Notification.Name(rawValue: "\(SwiftISY.bundleId).\(self.rawValue)" )
+    }
+    
+  }
   
-  /// Sent when the status of a device needs to be refreshed.
-  public static let needsRefresh = Notification.Name("\(SwiftISY.bundleId).needsRefresh")
-
-  /// Sent when the status of a device was refreshed.
-  public static let didRefresh = Notification.Name("\(SwiftISY.bundleId).didRefresh")
+//  /// Sent when the application returns from the background and is active.
+//  public static let onResume = Notification.Name("\(SwiftISY.bundleId).onResume")
+//  
+//  /// Sent when the status of a device needs to be refreshed.
+//  public static let needsRefresh = Notification.Name("\(SwiftISY.bundleId).needsRefresh")
+//
+//  /// Sent when the status of a device was refreshed.
+//  public static let didRefresh = Notification.Name("\(SwiftISY.bundleId).didRefresh")
 
 }

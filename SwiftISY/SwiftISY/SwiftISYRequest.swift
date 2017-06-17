@@ -279,7 +279,7 @@ extension SwiftISYRequest {
     let encodedAddress = SwiftISYRequest.encodedAddress(address)
     executeRest(command: "rest/nodes/\(encodedAddress)/cmd/\(command)") { (result) in
       DispatchQueue.main.async {
-        NotificationCenter.default.post(name: .needsRefresh, object: self.host, userInfo: [SwiftISY.Elements.address: address])
+        NotificationCenter.default.post(name: SwiftISY.Notifications.needsRefresh.notification, object: self.host, userInfo: [SwiftISY.Elements.address: address])
       }
       completion(result)
     }

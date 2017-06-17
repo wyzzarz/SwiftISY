@@ -243,7 +243,7 @@ class SwiftISYControllerCommandTests: XCTestCase {
   
   func testDeviceOff() {
     // validate notification after turning node off
-    _ = expectation(forNotification: NSNotification.Name.needsRefresh.rawValue, object: nil, handler: { (n) -> Bool in
+    _ = expectation(forNotification: SwiftISY.Notifications.needsRefresh.notification.rawValue, object: nil, handler: { (n) -> Bool in
       guard let userInfo = n.userInfo else { return false }
       guard let address = userInfo[SwiftISY.Elements.address] as? String else { return false }
       XCTAssertEqual(address, self._node!.address)
@@ -251,7 +251,7 @@ class SwiftISYControllerCommandTests: XCTestCase {
     })
     
     // confirm status updated for node
-    _ = expectation(forNotification: NSNotification.Name.didRefresh.rawValue, object: nil, handler: { (n) -> Bool in
+    _ = expectation(forNotification: SwiftISY.Notifications.didRefresh.notification.rawValue, object: nil, handler: { (n) -> Bool in
       guard let userInfo = n.userInfo else { return false }
       guard let address = userInfo[SwiftISY.Elements.address] as? String else { return false }
       XCTAssertEqual(address, self._node!.address)
