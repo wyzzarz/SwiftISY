@@ -1,5 +1,7 @@
 # --------------------------------------------------------------------------------------------------
 # Carthage Update
+#
+# Run carthage-update.sh to install and update Carthage packages.
 # --------------------------------------------------------------------------------------------------
 # carthage update --platform iOS --use-submodules
 

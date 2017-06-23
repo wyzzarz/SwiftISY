@@ -74,7 +74,8 @@ SwiftISY by adding the following line to your Cartfile.
 github "wyzzarz/SwiftISY"
 ```
 
-To install the framework, run `carthage update --platform iOS`
+To install the framework, run `carthage update --platform iOS --use-submodules`.  The script
+`carthage-update.sh` includes this command.
 
 ## Author
 
