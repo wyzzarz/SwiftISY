@@ -34,6 +34,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     SwiftISYHost.providePassword { (host) -> String in
       return "your password"
     }
+    try? SwiftISYController.sharedInstance.hosts.add(SwiftISYHost(host: "your host", user: "your username"))
     
     return true
   }

@@ -21,9 +21,9 @@ import UIKit
 import SwiftISY
 
 class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
-
-  // create request to host
-  let request = SwiftISYRequest(SwiftISYHost(host: "your host", user: "your username"))
+  
+  // isy
+  let host = SwiftISYController.sharedInstance.hosts.first
   
   // create array to hold devices
   var nodes: [SwiftISYNode] = []
@@ -42,13 +42,11 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     self.view.addSubview(tableView)
     
     // get nodes
-    request.nodes { (results) in
-      if let objects = results.objects { self.nodes = objects.nodes.sorted(by: { (n1, n2) -> Bool in
-        return n1.name.compare(n2.name) == ComparisonResult.orderedAscending
-      }) }
+    guard let host = host else { return }
+    SwiftISYController.sharedInstance.refresh(host) { (controller, success) in
+      self.nodes = Array(controller.nodes(host))
       self.tableView.reloadData()
     }
-    
   }
   
   func numberOfSections(in tableView: UITableView) -> Int {
@@ -74,8 +72,11 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
   
   func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     tableView.deselectRow(at: indexPath, animated: true)
+    
+    // get address
     let node = nodes[indexPath.row]
-    print("Address: \(node.address)")
+    let address = node.address
+    print("Address: \(address)")
   }
   
 }
