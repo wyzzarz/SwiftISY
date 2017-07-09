@@ -217,7 +217,7 @@ public class SwiftISYStatus: SCDocument, SwiftISYParserProtocol {
   }
   
   override open var description: String {
-    return String(describing: "\(String(describing: type(of: self)))(\"\(address)\")")
+    return String(describing: "\(String(describing: type(of: self)))(\"\(address)\",\"\(value)\")")
   }
   
   public func update(elementName: String, attributes: [String : String], text: String = "") {
