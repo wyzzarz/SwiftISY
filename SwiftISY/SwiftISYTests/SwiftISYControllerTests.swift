@@ -241,8 +241,8 @@ class SwiftISYControllerCommandTests: XCTestCase {
     XCTAssertEqual(dimmableCount, 1)
   }
   
-  func testDeviceOff() {
-    // validate notification after turning node off
+  func testDeviceOn() {
+    // validate notification after turning node on
     _ = expectation(forNotification: SwiftISY.Notifications.needsRefresh.notification.rawValue, object: nil, handler: { (n) -> Bool in
       guard let userInfo = n.userInfo else { return false }
       guard let address = userInfo[SwiftISY.Elements.address] as? String else { return false }
@@ -256,7 +256,7 @@ class SwiftISYControllerCommandTests: XCTestCase {
       guard let address = userInfo[SwiftISY.Elements.address] as? String else { return false }
       XCTAssertEqual(address, self._node!.address)
       let status = self._controller.status(self._host!, address: self._node!.address).values.first
-      XCTAssertEqual(status!.value, 0)
+      XCTAssertEqual(status!.value, 255)
       return address == self._node!.address
     })
     
@@ -266,8 +266,8 @@ class SwiftISYControllerCommandTests: XCTestCase {
     let status = _controller.status(_host!, address: _node!.address).values.first
     XCTAssertEqual(status!.value, 75)
     
-    // turn node off
-    _controller.request(_host!).off(address: _node!.address) { (result) in
+    // turn node on
+    _controller.request(_host!).on(address: _node!.address) { (result) in
       XCTAssertTrue(result.success)
       XCTAssertEqual(result.objects!.responses.count, 1)
     }

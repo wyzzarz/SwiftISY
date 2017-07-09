@@ -136,7 +136,7 @@ class SwiftISYRequestTests: XCTestCase {
   }
 
   func testResponseRequest() {
-    let e = expectation(description: Paths.on)
+    let e = expectation(description: Paths.off)
     
     SwiftISYRequest(host).on(address: "24 DD AD 1") { (result) in
       e.fulfill()
