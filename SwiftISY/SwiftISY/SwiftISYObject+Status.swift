@@ -169,6 +169,16 @@ public class SwiftISYStatus: SCDocument, SwiftISYParserProtocol {
   /// * Or a value between `0` and `255`.
   public var value: UInt8 = 0
   
+  /// Returns `true` if the value for this status is greater than `0`.  `false` otherwise.
+  public var isOn: Bool {
+    return value > 0
+  }
+  
+  /// Returns `true` if the value for this status is `0`.  `false` otherwise.
+  public var isOff: Bool {
+    return value == 0
+  }
+  
   /// Formatted text for the current value such as:
   ///
   /// * "On" when the value is `0`
