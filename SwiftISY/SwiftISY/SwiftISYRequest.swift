@@ -273,16 +273,23 @@ extension SwiftISYRequest {
   /// - Parameters:
   ///   - address: Address for the node/group.
   ///   - command: Command to be issued for the node.
+  ///   - notification: Optional notification to be sent open successful execution of command.
   ///   - completion: The closure to execute once the network request has completed.
   ///
-  fileprivate func deviceCommand(address: String, command: String, completion: @escaping Completion) {
+  fileprivate func deviceCommand(address: String, command: String, notification: Notification? = nil, completion: @escaping Completion) {
     let encodedAddress = SwiftISYRequest.encodedAddress(address)
-    executeRest(command: "rest/nodes/\(encodedAddress)/cmd/\(command)") { (result) in
+    executeRest(command: "rest/nodes/\(encodedAddress)/cmd/\(command)", completion: { (result) in
+      guard result.success else { return }
       DispatchQueue.main.async {
-        NotificationCenter.default.post(name: SwiftISY.Notifications.needsRefresh.notification, object: self.host, userInfo: [SwiftISY.Elements.address: address])
+        let nc = NotificationCenter.default
+        if notification != nil {
+          nc.post(notification!)
+        } else {
+          nc.post(name: SwiftISY.Notifications.needsRefresh.notification, object: self.host, userInfo: [SwiftISY.Elements.address: address])
+          
+        }
       }
-      completion(result)
-    }
+    })
   }
   
   ///
@@ -295,10 +302,21 @@ extension SwiftISYRequest {
   ///   - brightness: Sets the brightness level for a dimmable light from 0.0 (0%) to 1.0 (100%).
   ///   - completion: The closure to execute once the network request has completed.
   public func on(address: String, fast: Bool = false, brightness: Double = 1.0, completion: @escaping Completion) {
+    // calculate brightness for device
     var command = fast ? "DFON" : "DON"
     let brightness = min(1.0, max(0.0, brightness))
-    if brightness < 1.0 { command += "/\(Int(round(brightness * 255)))" }
-    deviceCommand(address: address, command: command, completion: completion)
+    let value = UInt8(round(brightness * 255))
+    if brightness < 1.0 { command += "/\(value)" }
+    
+    // populate notification to be sent upon success
+    var userInfo: [String: Any] = [:]
+    userInfo[SwiftISY.Elements.address] = address
+    userInfo[SwiftISY.Attributes.value] = value
+    userInfo[SwiftISY.Attributes.formatted] = String(Int(round(brightness * 100)))
+    let notification = Notification(name: SwiftISY.Notifications.updateStatus.notification, object: host, userInfo: userInfo)
+
+    // issue command
+    deviceCommand(address: address, command: command, notification: notification, completion: completion)
   }
 
   ///
@@ -311,7 +329,15 @@ extension SwiftISYRequest {
   ///   - completion: The closure to execute once the network request has completed.
   ///
   public func off(address: String, fast: Bool = false, completion: @escaping Completion) {
-    deviceCommand(address: address, command: fast ? "DFOF" : "DOF", completion: completion)
+    // populate notification to be sent upon success
+    var userInfo: [String: Any] = [:]
+    userInfo[SwiftISY.Elements.address] = address
+    userInfo[SwiftISY.Attributes.value] = UInt8(0)
+    userInfo[SwiftISY.Attributes.formatted] = "0"
+    let notification = Notification(name: SwiftISY.Notifications.updateStatus.notification, object: host, userInfo: userInfo)
+
+    // issue command
+    deviceCommand(address: address, command: fast ? "DFOF" : "DOF", notification: notification, completion: completion)
   }
 
   ///

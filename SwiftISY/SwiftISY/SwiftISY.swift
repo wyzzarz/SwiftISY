@@ -25,7 +25,7 @@ import Foundation
 
 public struct SwiftISY {
   
-  typealias UserInfo = [String: String]
+  public typealias UserInfo = [String: String]
   
   /// Bundle Id for this framework.
   public static let bundleId = "com.wyz.SwiftISY"
@@ -517,6 +517,9 @@ extension SwiftISY {
     
     /// Sent when the status of a device was refreshed.
     case didRefresh = "didRefresh"
+    
+    /// Sent when the status of a device needs to be updated.
+    case updateStatus = "updateStatus"
     
     /// Returns a `Notification.Name` for this enumeration value.
     public var notification : Notification.Name  {

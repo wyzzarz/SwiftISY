@@ -480,23 +480,79 @@ public class SwiftISYController {
     }
   }
   
-  @objc public func needsRefresh(n: Notification) {
+  /// Called when an object needs to be refreshed from a host.
+  ///
+  /// - Parameter n: Notification including host and address.
+  @objc fileprivate func needsRefresh(n: Notification) {
     guard let host = n.object as? SwiftISYHost else { return }
-    guard let userInfo = n.userInfo as? SwiftISY.UserInfo else { return }
-    guard let address = userInfo[SwiftISY.Elements.address] else { return }
-    DispatchQueue.main.async {
-      self.refresh(host, address: address, completion: { (controller, success) in
+    guard let userInfo = n.userInfo else { return }
+    guard let address = userInfo[SwiftISY.Elements.address] as? String else { return }
+    guard let node = nodes(host).document(address: address) else { return }
+    performRefresh(host: host, node: node, max: DispatchTime.now() + 1.0) { (success) in
+      if success {
+        let nc = NotificationCenter.default
+        nc.post(name: SwiftISY.Notifications.didRefresh.notification, object: host, userInfo: userInfo)
+      }
+    }
+  }
+  
+  fileprivate func performRefresh(host: SwiftISYHost, node: SwiftISYNode, max: DispatchTime, completion: @escaping (_ success: Bool) -> Void) {
+    print("trying")
+    // get current value to check against
+    let value = status(host, address: node.address).values.first?.value
+
+    // wait a little bit before checking the latest status from the host
+    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1) {
+      
+      // refresh the status for this address
+      self.refresh(host, address: node.address, completion: { (controller, success) in
+        
+        // handle successful refresh
         if success {
-          let nc = NotificationCenter.default
-          nc.post(name: SwiftISY.Notifications.didRefresh.notification, object: host, userInfo: userInfo)
+          // get the current value
+          guard let anotherValue = self.status(host, address: node.address).values.first?.value else {
+            completion(false)
+            return
+          }
+
+          // check that the value has changed
+          if value == nil || value != anotherValue {
+            completion(true)
+            return
+          }
         }
+        
+        // exit if we have timed out
+        if DispatchTime.now() > max {
+          completion(false)
+          return
+        }
+        
+        // otherwise try again
+        self.performRefresh(host: host, node: node, max: max, completion: completion)
       })
+    }
+  }
+  
+  @objc fileprivate func updateStatus(n: Notification) {
+    guard let host = n.object as? SwiftISYHost else { return }
+    guard let userInfo = n.userInfo as? [String: Any] else { return }
+    guard let address = userInfo[SwiftISY.Elements.address] as? String else { return }
+    guard let value = userInfo[SwiftISY.Attributes.value] as? UInt8 else { return }
+    guard let formatted = userInfo[SwiftISY.Attributes.formatted] as? String else { return }
+    guard let status = self.status(host, address: address).values.first else { return }
+    status.value = value
+    status.formatted = formatted
+    DispatchQueue.main.async {
+      let nc = NotificationCenter.default
+      nc.post(name: SwiftISY.Notifications.didRefresh.notification, object: host, userInfo: userInfo)
     }
   }
   
   fileprivate func handleNotifications() {
     let nc = NotificationCenter.default
     nc.addObserver(self, selector: #selector(needsRefresh(n:)), name: SwiftISY.Notifications.needsRefresh.notification, object: nil)
+    nc.addObserver(self, selector: #selector(updateStatus(n:)), name: SwiftISY.Notifications.updateStatus.notification, object: nil)
   }
   
 }
