@@ -497,7 +497,6 @@ public class SwiftISYController {
   }
   
   fileprivate func performRefresh(host: SwiftISYHost, node: SwiftISYNode, max: DispatchTime, completion: @escaping (_ success: Bool) -> Void) {
-    print("trying")
     // get current value to check against
     let value = status(host, address: node.address).values.first?.value
 
