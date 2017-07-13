@@ -1,3 +1,6 @@
 [submodule "Carthage/Checkouts/SwiftCollection"]
 	path = Carthage/Checkouts/SwiftCollection
 	url = https://github.com/wyzzarz/SwiftCollection.git
+[submodule "Carthage/Checkouts/Starscream"]
+	path = Carthage/Checkouts/Starscream
+	url = https://github.com/daltoniam/Starscream.git

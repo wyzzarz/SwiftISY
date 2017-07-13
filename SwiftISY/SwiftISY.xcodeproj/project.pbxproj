@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		992B06E21F1723A6007566D2 /* Starscream.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 992B06E11F1723A6007566D2 /* Starscream.framework */; };
 		992DEB461EEC66A1008A8F1F /* SwiftCollection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 992DEB451EEC66A1008A8F1F /* SwiftCollection.framework */; };
 		992DEB471EEC6789008A8F1F /* SwiftCollection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 992DEB451EEC66A1008A8F1F /* SwiftCollection.framework */; };
 		9959E4FF1E9AA0E900D376A9 /* SwiftISYControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9959E4FE1E9AA0E900D376A9 /* SwiftISYControllerTests.swift */; };
@@ -43,6 +44,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		992B06E11F1723A6007566D2 /* Starscream.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Starscream.framework; path = ../Carthage/Build/iOS/Starscream.framework; sourceTree = "<group>"; };
 		992DEB451EEC66A1008A8F1F /* SwiftCollection.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftCollection.framework; path = ../Carthage/Build/iOS/SwiftCollection.framework; sourceTree = "<group>"; };
 		9959E4FE1E9AA0E900D376A9 /* SwiftISYControllerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYControllerTests.swift; sourceTree = "<group>"; };
 		998139581E94081B00D0D72E /* SwiftISYTests.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = SwiftISYTests.bundle; sourceTree = "<group>"; };
@@ -79,6 +81,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				992DEB461EEC66A1008A8F1F /* SwiftCollection.framework in Frameworks */,
+				992B06E21F1723A6007566D2 /* Starscream.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -146,6 +149,7 @@
 		99E4D3FB1E8378850054040C /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				992B06E11F1723A6007566D2 /* Starscream.framework */,
 				992DEB451EEC66A1008A8F1F /* SwiftCollection.framework */,
 				99E4D3FC1E8378850054040C /* SwiftCollection.framework */,
 			);
@@ -284,6 +288,7 @@
 			);
 			inputPaths = (
 				"$(SRCROOT)/../Carthage/Build/iOS/SwiftCollection.framework",
+				"$(SRCROOT)/../Carthage/Build/iOS/Starscream.framework",
 			);
 			name = Carthage;
 			outputPaths = (
