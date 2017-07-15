@@ -242,22 +242,12 @@ class SwiftISYControllerCommandTests: XCTestCase {
   }
   
   func testDeviceOn() {
-    // validate notification after turning node on
-    _ = expectation(forNotification: SwiftISY.Notifications.needsRefresh.notification.rawValue, object: nil, handler: { (n) -> Bool in
-      guard let userInfo = n.userInfo else { return false }
-      guard let address = userInfo[SwiftISY.Elements.address] as? String else { return false }
-      XCTAssertEqual(address, self._node!.address)
-      return address == self._node!.address
-    })
-    
     // confirm status updated for node
-    _ = expectation(forNotification: SwiftISY.Notifications.didRefresh.notification.rawValue, object: nil, handler: { (n) -> Bool in
-      guard let userInfo = n.userInfo else { return false }
-      guard let address = userInfo[SwiftISY.Elements.address] as? String else { return false }
-      XCTAssertEqual(address, self._node!.address)
-      let status = self._controller.status(self._host!, address: self._node!.address).values.first
-      XCTAssertEqual(status!.value, 255)
-      return address == self._node!.address
+    _ = expectation(forNotification: SwiftCollection.Notifications.didChange.notification.rawValue, object: nil, handler: { (n) -> Bool in
+      guard let status = n.object as? SwiftISYStatus else { return false }
+      XCTAssertEqual(status.address, self._node!.address)
+      XCTAssertEqual(status.value, 255)
+      return status.address == self._node!.address
     })
     
     // validate node
@@ -275,6 +265,6 @@ class SwiftISYControllerCommandTests: XCTestCase {
     waitForExpectations(timeout: 60) { (error) in
       guard error == nil else { XCTFail(error!.localizedDescription); return }
     }
- }
+  }
   
 }

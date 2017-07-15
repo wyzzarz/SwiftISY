@@ -37,6 +37,17 @@ public struct SwiftISY {
     let version = info["CFBundleShortVersionString"] as! String
     return "\(name) v\(version)"
   }
+
+  ///
+  /// Keys for headers.
+  ///
+  public struct Headers {
+    
+    public static let authorization = "Authorization"
+    public static let origin = "Origin"
+    public static let socketVersion = "Sec-WebSocket-Version"
+    
+  }
   
   ///
   /// Keys for ISY attributes.
@@ -46,6 +57,8 @@ public struct SwiftISY {
     public static let flag = "flag"
     public static let formatted = "formatted"
     public static let id = "id"
+    public static let sequenceNumber = "seqnum"
+    public static let subscriptionId = "sid"
     public static let succeeded = "succeeded"
     public static let type = "type"
     public static let unitsOfMeasure = "uom"
@@ -58,13 +71,17 @@ public struct SwiftISY {
   ///
   public struct Elements {
     
+    public static let action = "action"
     public static let address = "address"
     public static let controllerIds = "controllerIds"
+    public static let control = "control"
     public static let dcPeriod = "dcPeriod"
     public static let deviceClass = "deviceClass"
     public static let deviceGroup = "deviceGroup"
+    public static let duration = "duration"
     public static let elkId = "ELK_ID"
     public static let enabled = "enabled"
+    public static let event = "Event"
     public static let family = "family"
     public static let group = "group"
     public static let link = "link"
@@ -78,16 +95,22 @@ public struct SwiftISY {
     public static let responderIds = "responderIds"
     public static let restResponse = "RestResponse"
     public static let status = "status"
+    public static let subscriptionId = "SID"
     public static let type = "type"
     public static let wattage = "wattage"
     
   }
   
   ///
-  /// Values for ISY property types.
+  /// Values for ISY control types (properties and events).
   ///
-  public struct PropertyTypes {
+  public struct Control {
     
+    public static let deviceOff = "DOF"
+    public static let deviceOn = "DON"
+    public static let error = "ERR"
+    public static let onLevel = "OL"
+    public static let rampRate = "RR"
     public static let status = "ST"
     
   }

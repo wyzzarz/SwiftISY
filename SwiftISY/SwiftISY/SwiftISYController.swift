@@ -98,9 +98,9 @@ public class SwiftISYController {
   }
   fileprivate var _statuses: [SwiftCollection.Id: SwiftISYStatuses] = [:]
 
-  // -------------------------------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------------------------
   // MARK: - Initializers
-  // -------------------------------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------------------------
 
   /// Creates an instance of `SwiftISYController`.  Nodes, Groups and Statuses are loaded from
   /// persistent storage upon initialization.
@@ -118,9 +118,9 @@ public class SwiftISYController {
     }
   }
   
-  // -------------------------------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------------------------
   // MARK: - Reload
-  // -------------------------------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------------------------
   
   /// Processes each host.
   ///
@@ -206,16 +206,16 @@ public class SwiftISYController {
     try? statuses(host).load(jsonStorage: storage, completion: nil)
   }
   
-  // -------------------------------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------------------------
   // MARK: - Refresh
-  // -------------------------------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------------------------
   
   /// Fetch nodes, groups and statuses for all hosts.
   ///
   /// - Parameter completion: Called once refresh is complete.
   public func refresh(completion: Completion?) {
     processHosts(completion: completion) { (host, i , count) in
-      refresh(host) { (success) in
+      self.refresh(host) { (success) in
         if count - i > 1 { return }
         if let completion = completion { completion(self, true) }
       }
@@ -228,21 +228,23 @@ public class SwiftISYController {
   ///   - host: Host to refresh.
   ///   - completion: Called once refresh is complete.
   public func refresh(_ host: SwiftISYHost, completion: Completion?) {
-    /// call to nodes includes nodes, groups and statuses
-    SwiftISYRequest(host).nodes { (result) in
-      defer {
-        if let completion = completion { completion(self, result.success) }
+    try? socket(host).open() { (success, error) in
+      /// call to nodes includes nodes, groups and statuses
+      self.request(host).nodes { (result) in
+        defer {
+          if let completion = completion { completion(self, result.success) }
+        }
+        guard result.success else { return }
+        guard let objects = result.objects else { return }
+        self.refreshNodes(host, nodes: objects.nodes)
+        self.refreshGroups(host, groups: objects.groups)
+        self.refreshStatuses(host, statuses: Array<SwiftISYStatus>(objects.statuses.values))
       }
-      guard result.success else { return }
-      guard let objects = result.objects else { return }
-      self.refreshNodes(host, nodes: objects.nodes)
-      self.refreshGroups(host, groups: objects.groups)
-      self.refreshStatuses(host, statuses: Array<SwiftISYStatus>(objects.statuses.values))
     }
   }
   
   public func refresh(_ host: SwiftISYHost, address: String, completion: Completion?) {
-    SwiftISYRequest(host).status(address: address) { (result) in
+    request(host).status(address: address) { (result) in
       defer {
         if let completion = completion { completion(self, result.success) }
       }
@@ -377,16 +379,19 @@ public class SwiftISYController {
     // process statuses
     for status in theStatuses {
       if let i = statuses.index(of: status) {
-        try? statuses.replace(at: i, with: status)
+        // update existing status
+        let existing = statuses[i]
+        existing.update(otherStatus: status)
       } else {
+        // otherwise add new status
         try? statuses.add(status)
       }
     }
   }
   
-  // -------------------------------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------------------------
   // MARK: - Request
-  // -------------------------------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------------------------
 
   public func request(_ host: SwiftISYHost) -> SwiftISYRequest {
     if let request = _requests[host] { return request }
@@ -395,11 +400,50 @@ public class SwiftISYController {
     return request
   }
   fileprivate var _requests: [SwiftISYHost: SwiftISYRequest] = [:]
+  
+  // -----------------------------------------------------------------------------------------------
+  // MARK: - Socket
+  // -----------------------------------------------------------------------------------------------
+  
+  fileprivate func socket(_ host: SwiftISYHost) -> SwiftISYSocket {
+    if let socket = _sockets[host] { return socket }
+    let socket = SwiftISYSocket(host)
+    socket.setDidReceiveMessage { (message) in
+      DispatchQueue.main.async {
+        self.handleSocketMessage(host, message)
+      }
+    }
+    _sockets[host] = socket
+    return socket
+  }
+  fileprivate var _sockets: [SwiftISYHost: SwiftISYSocket] = [:]
 
-  // -------------------------------------------------------------------------------------------------
+  fileprivate func handleSocketMessage(_ host: SwiftISYHost, _ message: SwiftISYSocket.Message) {
+    // only handle status updates
+    guard message.control == SwiftISY.Control.status else { return }
+    // get status for this address
+    guard let status = status(host, address: message.address)[message.address] else { return }
+    // update status
+    status.update(value: UInt8(message.value))
+  }
+  
+  // -----------------------------------------------------------------------------------------------
   // MARK: - Object
-  // -------------------------------------------------------------------------------------------------
-
+  // -----------------------------------------------------------------------------------------------
+  
+  /// Returns an object (SwiftISYNode or SwiftISYGroup) at this address on the specified host.
+  ///
+  /// - Parameters:
+  ///   - host: Host for device.
+  ///   - address: Address for node or group.
+  /// - Returns: `SwiftISYNode` if the address is for a node.  `SwiftISYGroup` if the address is for
+  ///            a group.  `nil` if it is invalid or does not exist.
+  public func object(_ host: SwiftISYHost, address: String) -> Any? {
+    if let node = nodes(host).document(address: address) { return node }
+    if let group = groups(host).document(address: address) { return group }
+    return nil
+  }
+  
   public func status(_ host: SwiftISYHost, address: String) -> [String: SwiftISYStatus] {
     if let node = nodes(host).document(address: address) { return status(host, node: node) }
     if let group = groups(host).document(address: address) { return status(host, group: group) }
@@ -422,9 +466,9 @@ public class SwiftISYController {
     return theStatuses
   }
   
-  // -------------------------------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------------------------
   // MARK: - Notifications
-  // -------------------------------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------------------------
   
   /// Whether notifications are sent to observers.
   public var notificationsEnabled: Bool {
@@ -485,6 +529,7 @@ public class SwiftISYController {
   /// - Parameter n: Notification including host and address.
   @objc fileprivate func needsRefresh(n: Notification) {
     guard let host = n.object as? SwiftISYHost else { return }
+    guard socket(host).isConnected == false else { return }
     guard let userInfo = n.userInfo else { return }
     guard let address = userInfo[SwiftISY.Elements.address] as? String else { return }
     guard let node = nodes(host).document(address: address) else { return }
@@ -538,14 +583,8 @@ public class SwiftISYController {
     guard let userInfo = n.userInfo as? [String: Any] else { return }
     guard let address = userInfo[SwiftISY.Elements.address] as? String else { return }
     guard let value = userInfo[SwiftISY.Attributes.value] as? UInt8 else { return }
-    guard let formatted = userInfo[SwiftISY.Attributes.formatted] as? String else { return }
     guard let status = self.status(host, address: address).values.first else { return }
-    status.value = value
-    status.formatted = formatted
-    DispatchQueue.main.async {
-      let nc = NotificationCenter.default
-      nc.post(name: SwiftISY.Notifications.didRefresh.notification, object: host, userInfo: userInfo)
-    }
+    status.update(value: value)
   }
   
   fileprivate func handleNotifications() {

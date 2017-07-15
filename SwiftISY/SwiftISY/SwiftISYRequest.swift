@@ -151,7 +151,7 @@ extension SwiftISYRequest {
     
     // create a request and include the authorization header
     var request = URLRequest(url: url)
-    request.setValue(authorization, forHTTPHeaderField: "Authorization")
+    request.setValue(authorization, forHTTPHeaderField: SwiftISY.Headers.authorization)
     
     // done
     return (request, nil)
@@ -314,7 +314,6 @@ extension SwiftISYRequest {
     var userInfo: [String: Any] = [:]
     userInfo[SwiftISY.Elements.address] = address
     userInfo[SwiftISY.Attributes.value] = value
-    userInfo[SwiftISY.Attributes.formatted] = String(Int(round(brightness * 100)))
     let notification = Notification(name: SwiftISY.Notifications.updateStatus.notification, object: host, userInfo: userInfo)
 
     // issue command
@@ -335,7 +334,6 @@ extension SwiftISYRequest {
     var userInfo: [String: Any] = [:]
     userInfo[SwiftISY.Elements.address] = address
     userInfo[SwiftISY.Attributes.value] = UInt8(0)
-    userInfo[SwiftISY.Attributes.formatted] = "0"
     let notification = Notification(name: SwiftISY.Notifications.updateStatus.notification, object: host, userInfo: userInfo)
 
     // issue command

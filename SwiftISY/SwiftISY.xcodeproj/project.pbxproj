@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		992B06DA1F16794E007566D2 /* SwiftISYSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 992B06D91F16794E007566D2 /* SwiftISYSocket.swift */; };
 		992B06E21F1723A6007566D2 /* Starscream.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 992B06E11F1723A6007566D2 /* Starscream.framework */; };
 		992DEB461EEC66A1008A8F1F /* SwiftCollection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 992DEB451EEC66A1008A8F1F /* SwiftCollection.framework */; };
 		992DEB471EEC6789008A8F1F /* SwiftCollection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 992DEB451EEC66A1008A8F1F /* SwiftCollection.framework */; };
@@ -44,6 +45,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		992B06D91F16794E007566D2 /* SwiftISYSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYSocket.swift; sourceTree = "<group>"; };
 		992B06E11F1723A6007566D2 /* Starscream.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Starscream.framework; path = ../Carthage/Build/iOS/Starscream.framework; sourceTree = "<group>"; };
 		992DEB451EEC66A1008A8F1F /* SwiftCollection.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftCollection.framework; path = ../Carthage/Build/iOS/SwiftCollection.framework; sourceTree = "<group>"; };
 		9959E4FE1E9AA0E900D376A9 /* SwiftISYControllerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftISYControllerTests.swift; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 				99863A831E4D6C0D001DAB3B /* SwiftISY.h */,
 				99863AC31E4ECB27001DAB3B /* SwiftISY.swift */,
 				99863AC51E4ECF15001DAB3B /* SwiftISYRequest.swift */,
+				992B06D91F16794E007566D2 /* SwiftISYSocket.swift */,
 				99863AC71E4ECF38001DAB3B /* SwiftISYParser.swift */,
 				99863AC81E4ECF38001DAB3B /* SwiftISYObject.swift */,
 				99EA5A911EBECF36009A835E /* SwiftISYObject+Host.swift */,
@@ -304,6 +307,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				992B06DA1F16794E007566D2 /* SwiftISYSocket.swift in Sources */,
 				99863AC41E4ECB27001DAB3B /* SwiftISY.swift in Sources */,
 				99EA5A8A1EBECC4B009A835E /* SwiftISYObject+Response.swift in Sources */,
 				99863AC61E4ECF15001DAB3B /* SwiftISYRequest.swift in Sources */,

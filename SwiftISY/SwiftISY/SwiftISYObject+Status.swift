@@ -166,7 +166,7 @@ public class SwiftISYStatus: SCDocument, SwiftISYParserProtocol {
   ///
   /// * `0` for off
   /// * `255` for on
-  /// * Or a value between `0` and `255`.
+  /// * Or a value between `0` and `255`
   public var value: UInt8 = 0
   
   /// Returns `true` if the value for this status is greater than `0`.  `false` otherwise.
@@ -185,6 +185,12 @@ public class SwiftISYStatus: SCDocument, SwiftISYParserProtocol {
   /// * "Off" when the value is `255`
   /// * "%" when the value is fractional
   public var formatted: String = ""
+  
+  /// Returns formatted text that can be used for display.  Adds % to fractional values.
+  public var display: String {
+    guard let fractional = Int(formatted) else { return formatted }
+    return "\(fractional)%"
+  }
   
   /// Unit of measure for values such as:
   ///
@@ -206,7 +212,7 @@ public class SwiftISYStatus: SCDocument, SwiftISYParserProtocol {
   static func canHandle(elementName: String, attributes: [String: String]) -> Bool {
     guard elementName == SwiftISY.Elements.property else { return false }
     guard let type = attributes[SwiftISY.Attributes.id] else { return false }
-    return type == SwiftISY.PropertyTypes.status
+    return type == SwiftISY.Control.status
   }
   
   public required convenience init(elementName: String, attributes: [String: String]) {
@@ -218,6 +224,47 @@ public class SwiftISYStatus: SCDocument, SwiftISYParserProtocol {
   
   override open var description: String {
     return String(describing: "\(String(describing: type(of: self)))(\"\(address)\",\"\(value)\")")
+  }
+  
+  /// Applies properties from the other status to this status.
+  ///
+  /// - Parameter status: Status to be updated from.
+  public func update(otherStatus status: SwiftISYStatus) {
+    var changes = startChanges()
+    let oldValue = self.value
+    if (oldValue != status.value) {
+      self.value = status.value
+      changes.add(SwiftCollection.Notifications.Change(Keys.value, oldValue: String(oldValue), newValue: String(self.value)))
+    }
+    let oldFormatted = formatted
+    if (oldFormatted != status.formatted) {
+      formatted = status.formatted
+      changes.add(SwiftCollection.Notifications.Change(Keys.formatted, oldValue: oldFormatted, newValue: formatted))
+    }
+    let oldUnitOfMeasure = unitOfMeasure
+    if (oldUnitOfMeasure != status.unitOfMeasure) {
+      unitOfMeasure = status.unitOfMeasure
+      changes.add(SwiftCollection.Notifications.Change(Keys.unitOfMeasure, oldValue: oldUnitOfMeasure, newValue: unitOfMeasure))
+    }
+    changes.post()
+  }
+  
+  /// Applies the supplied value to `value` and `formatted`.
+  ///
+  /// - Parameter value: Value to be applied.
+  public func update(value: UInt8) {
+    var changes = startChanges()
+    let oldValue = self.value
+    let oldFormatted = formatted
+    self.value = value
+    switch self.value {
+    case 255: formatted = "On"
+    case 0: formatted = "Off"
+    default: formatted = String(format: "%0.0f", round(Double(value) / 255.0 * 100.0))
+    }
+    changes.add(SwiftCollection.Notifications.Change(Keys.value, oldValue: String(oldValue), newValue: String(self.value)))
+    changes.add(SwiftCollection.Notifications.Change(Keys.formatted, oldValue: oldFormatted, newValue: formatted))
+    changes.post()
   }
   
   public func update(elementName: String, attributes: [String : String], text: String = "") {
