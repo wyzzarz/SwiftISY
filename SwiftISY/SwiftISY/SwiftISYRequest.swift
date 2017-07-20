@@ -279,16 +279,18 @@ extension SwiftISYRequest {
   fileprivate func deviceCommand(address: String, command: String, notification: Notification? = nil, completion: @escaping Completion) {
     let encodedAddress = SwiftISYRequest.encodedAddress(address)
     executeRest(command: "rest/nodes/\(encodedAddress)/cmd/\(command)", completion: { (result) in
-      guard result.success else { return }
-      DispatchQueue.main.async {
-        let nc = NotificationCenter.default
-        if notification != nil {
-          nc.post(notification!)
-        } else {
-          nc.post(name: SwiftISY.Notifications.needsRefresh.notification, object: self.host, userInfo: [SwiftISY.Elements.address: address])
-          
+      if result.success {
+        DispatchQueue.main.async {
+          let nc = NotificationCenter.default
+          if notification != nil {
+            nc.post(notification!)
+          } else {
+            nc.post(name: SwiftISY.Notifications.needsRefresh.notification, object: self.host, userInfo: [SwiftISY.Elements.address: address])
+            
+          }
         }
       }
+      completion(result)
     })
   }
   
