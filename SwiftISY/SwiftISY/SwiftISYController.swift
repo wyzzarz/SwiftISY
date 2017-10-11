@@ -228,18 +228,28 @@ public class SwiftISYController {
   ///   - host: Host to refresh.
   ///   - completion: Called once refresh is complete.
   public func refresh(_ host: SwiftISYHost, completion: Completion?) {
-    try? socket(host).open() { (success, error) in
-      /// call to nodes includes nodes, groups and statuses
-      self.request(host).nodes { (result) in
-        defer {
-          if let completion = completion { completion(self, result.success) }
+    do {
+      try socket(host).open() { (success, error) in
+        if success {
+          print("Opened socket: \(host.host)")
+        } else if let error = error {
+          print("Error opening socket: \(error.localizedDescription)")
         }
-        guard result.success else { return }
-        guard let objects = result.objects else { return }
-        self.refreshNodes(host, nodes: objects.nodes)
-        self.refreshGroups(host, groups: objects.groups)
-        self.refreshStatuses(host, statuses: Array<SwiftISYStatus>(objects.statuses.values))
+        
+        /// call to nodes includes nodes, groups and statuses
+        self.request(host).nodes { (result) in
+          defer {
+            if let completion = completion { completion(self, result.success) }
+          }
+          guard result.success else { return }
+          guard let objects = result.objects else { return }
+          self.refreshNodes(host, nodes: objects.nodes)
+          self.refreshGroups(host, groups: objects.groups)
+          self.refreshStatuses(host, statuses: Array<SwiftISYStatus>(objects.statuses.values))
+        }
       }
+    } catch let error {
+      print("Error opening socket: \(error.localizedDescription)")
     }
   }
   
