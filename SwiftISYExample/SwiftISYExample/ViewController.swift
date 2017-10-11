@@ -19,12 +19,13 @@
 
 import UIKit
 import SwiftISY
+import SwiftCollection
 
 class ViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
   
   // isy
-  let host = SwiftISYController.sharedInstance.hosts.first
-  
+  var host: SwiftISYHost?
+
   // create array to hold devices
   var nodes: [SwiftISYNode] = []
   
@@ -42,11 +43,19 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     self.view.addSubview(tableView)
     
     // get nodes
-    guard let host = host else { return }
+    guard let host = SwiftISYController.sharedInstance.hosts.first else { return }
+    self.host = host
     SwiftISYController.sharedInstance.refresh(host) { (controller, success) in
       self.nodes = Array(controller.nodes(host))
       self.tableView.reloadData()
     }
+    
+    NotificationCenter.default.addObserver(self, selector: #selector(handleNotification(n:)), name: SwiftCollection.Notifications.didChange.notification, object: nil)
+  }
+  
+  func handleNotification(n: Notification) {
+    guard let status = n.object as? SwiftISYStatus else { return }
+    print(status)
   }
   
   func numberOfSections(in tableView: UITableView) -> Int {
