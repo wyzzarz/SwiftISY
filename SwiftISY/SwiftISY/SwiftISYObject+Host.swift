@@ -95,7 +95,7 @@ public class SwiftISYHost: SCDocument {
   ///   * Or an empty string if there is no password.
   public var password: String {
     // return this password
-    if _password != nil && _password!.characters.count > 0 { return _password! }
+    if _password != nil && _password!.count > 0 { return _password! }
     
     // otherwise try the password provider
     guard let closure = SwiftISYHost._providePassword else { return "" }
@@ -120,10 +120,10 @@ public class SwiftISYHost: SCDocument {
   ///
   public func authorization() -> (authorization: String?, error: SwiftISY.RequestError?) {
     let user = self.user
-    if user.characters.count == 0 { return (nil, SwiftISY.RequestError(kind: .invalidUser)) }
+    if user.count == 0 { return (nil, SwiftISY.RequestError(kind: .invalidUser)) }
     
     let password = self.password
-    if password.characters.count == 0 { return (nil, SwiftISY.RequestError(kind: .invalidPassword)) }
+    if password.count == 0 { return (nil, SwiftISY.RequestError(kind: .invalidPassword)) }
     
     let userPassword = String(format: "%@:%@", user, password)
     guard let userPasswordData = userPassword.data(using: String.Encoding.utf8) else { return (nil, SwiftISY.RequestError(kind: .invalidCredential)) }

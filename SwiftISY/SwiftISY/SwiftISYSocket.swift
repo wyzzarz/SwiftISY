@@ -105,7 +105,7 @@ public class SwiftISYSocket: WebSocketDelegate {
     
     // get address for this host
     let address = host.host
-    if address.characters.count == 0 {
+    if address.count == 0 {
       let error = SwiftISY.RequestError(kind: .invalidHost)
       if let completion = completion { completion(false, error) }
       throw error
@@ -177,7 +177,7 @@ public class SwiftISYSocket: WebSocketDelegate {
       // ensure this is for the current subscription
       guard message.subscriptionId == _subscriptionId else { return }
       // only hande messages for a node
-      guard message.node.characters.count > 0 else { return }
+      guard message.node.count > 0 else { return }
       
       // send this message
       var msg = Message()

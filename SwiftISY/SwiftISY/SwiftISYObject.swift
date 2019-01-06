@@ -129,11 +129,11 @@ extension SwiftISYAddressesProtocol {
     }
   }
 
-  final public func index(ofAddress address: String) -> Int {
+  public func index(ofAddress address: String) -> Int {
     return addresses.index(of: address)
   }
 
-  final public func contains(address: String) -> Bool {
+  public func contains(address: String) -> Bool {
     return index(ofAddress: address) != NSNotFound
   }
 

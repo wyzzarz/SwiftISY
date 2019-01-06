@@ -133,14 +133,14 @@ extension SwiftISYRequest {
   
   private func makeRequest(command: String) -> (URLRequest?, SwiftISY.RequestError?) {
     // ensure there is a command
-    if command.characters.count == 0 { return (nil, SwiftISY.RequestError(kind: .invalidCommand)) }
+    if command.count == 0 { return (nil, SwiftISY.RequestError(kind: .invalidCommand)) }
 
     // ensure there is a host
     guard let host = self.host else { return (nil, SwiftISY.RequestError(kind: .invalidHost)) }
 
     // get address for this host
     let address = host.host
-    if address.characters.count == 0 { return (nil, SwiftISY.RequestError(kind: .invalidHost)) }
+    if address.count == 0 { return (nil, SwiftISY.RequestError(kind: .invalidHost)) }
 
     // get authorization header for this host
     let (authorization, error) = host.authorization()
